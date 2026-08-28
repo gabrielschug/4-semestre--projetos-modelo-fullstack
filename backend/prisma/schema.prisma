@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -13,37 +8,40 @@ datasource db {
 }
 
 model Marca {
-  id             Int         @id @default(autoincrement())
-  nome           String      @db.VarChar(30)
-  carros         Carro[]
+  id     Int     @id @default(autoincrement())
+  nome   String  @db.VarChar(30)
+  carros Carro[]
+
   @@map("marcas")
 }
 
 model Carro {
-  id             Int          @id @default(autoincrement())
-  modelo         String       @db.VarChar(30)
-  ano            Int          @db.SmallInt
-  preco          Decimal      @db.Decimal(10, 2)
-  km             Int
-  foto           String
-  acessorios     String?
-  combustivel    Combustiveis @default(FLEX)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt()
-  destaque       Boolean      @default(true)
-  marca          Marca        @relation(fields: [marcaId], references: [id])
-  marcaId        Int
+  id          Int          @id @default(autoincrement())
+  modelo      String       @db.VarChar(30)
+  ano         Int          @db.SmallInt
+  preco       Decimal      @db.Decimal(10, 2)
+  km          Int
+  foto        String
+  acessorios  String?
+  combustivel Combustiveis @default(FLEX)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  destaque    Boolean      @default(true)
+  marcaId     Int
+  marca       Marca        @relation(fields: [marcaId], references: [id])
+
   @@map("carros")
 }
 
 model Cliente {
-  id            String   @db.VarChar(36) @id @default(uuid())
-  nome          String   @db.VarChar(60)
-  email         String   @db.VarChar(40)
-  senha         String   @db.VarChar(60)   // senha deve ser varchar(60)
-  cidade        String   @db.VarChar(30) 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt  
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  nome      String   @db.VarChar(60)
+  email     String   @db.VarChar(40)
+  senha     String   @db.VarChar(60)
+  cidade    String   @db.VarChar(30)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("clientes")
 }
 
