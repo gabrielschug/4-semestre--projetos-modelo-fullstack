@@ -1,166 +1,94 @@
 import { prisma } from "../lib/prisma";
 import { type Prisma } from "../generated/prisma/client"
 
-const notebooks: Prisma.NotebookCreateInput[] = [
-    {
-        modelo: "Aspire Go 15",
-        marca: "Acer",
-        processador: "Intel",
-        preco: 2800,
-        quant: 3
-    },
-    {
-        modelo: "Nitro 5 AN515",
-        marca: "Acer",
-        processador: "Intel",
-        preco: 5200,
-        quant: 8
-    },
-    {
-        modelo: "Inspiron 15 3000",
-        marca: "Dell",
-        processador: "Intel",
-        preco: 3200,
-        quant: 5
-    },
-    {
-        modelo: "XPS 13",
-        marca: "Dell",
-        processador: "Intel",
-        preco: 7800,
-        quant: 2
-    },
-    {
-        modelo: "Pavilion 15",
-        marca: "HP",
-        processador: "AMD",
-        preco: 2900,
-        quant: 7
-    },
-    {
-        modelo: "Envy x360",
-        marca: "HP",
-        processador: "AMD",
-        preco: 4500,
-        quant: 4
-    },
-    {
-        modelo: "ThinkPad E14",
-        marca: "Lenovo",
-        processador: "Intel",
-        preco: 3800,
-        quant: 6
-    },
-    {
-        modelo: "Yoga 7i",
-        marca: "Lenovo",
-        processador: "Intel",
-        preco: 6200,
-        quant: 3
-    },
-    {
-        modelo: "VivoBook 14",
-        marca: "Asus",
-        processador: "AMD",
-        preco: 3100,
-        quant: 9
-    },
-    {
-        modelo: "ZenBook 14",
-        marca: "Asus",
-        processador: "Intel",
-        preco: 6900,
-        quant: 1
-    },
-    {
-        modelo: "Ideapad 3",
-        marca: "Lenovo",
-        processador: "AMD",
-        preco: 2700,
-        quant: 12
-    },
-    {
-        modelo: "Latitude 3420",
-        marca: "Dell",
-        processador: "Intel",
-        preco: 4100,
-        quant: 4
-    },
-    {
-        modelo: "Spectre x360",
-        marca: "HP",
-        processador: "Intel",
-        preco: 8500,
-        quant: 2
-    },
-    {
-        modelo: "ROG Strix G15",
-        marca: "Asus",
-        processador: "AMD",
-        preco: 5800,
-        quant: 5
-    },
-    {
-        modelo: "Swift 3",
-        marca: "Acer",
-        processador: "AMD",
-        preco: 3400,
-        quant: 6
-    },
-    {
-        modelo: "Legion 5",
-        marca: "Lenovo",
-        processador: "AMD",
-        preco: 6100,
-        quant: 3
-    },
-    {
-        modelo: "ProBook 450",
-        marca: "HP",
-        processador: "Intel",
-        preco: 3700,
-        quant: 7
-    },
-    {
-        modelo: "TUF Gaming A15",
-        marca: "Asus",
-        processador: "AMD",
-        preco: 4900,
-        quant: 4
-    },
-    {
-        modelo: "Vostro 15",
-        marca: "Dell",
-        processador: "Intel",
-        preco: 3000,
-        quant: 10
-    },
-    {
-        modelo: "Chromebook 314",
-        marca: "Acer",
-        processador: "Intel",
-        preco: 2200,
-        quant: 15
-    },
-    {
-        modelo: "Surface Laptop 4",
-        marca: "Microsoft",
-        processador: "AMD",
-        preco: 7200,
-        quant: 2
-    }
-]
-
-async function main() {
-    try {
-        await prisma.notebook.createMany({ data: notebooks })
-        console.log(`${notebooks.length} Notebooks Cadastrados...`)
-    } catch (error) {
-        console.error("Erro nas Inclusões (Seeds):", error);
-        throw error;
-    } finally {
-        await prisma.$disconnect();
-    }
+// 1. Limpar o banco para não duplicar
+async function limparBanco() {
+    await prisma.itensPedido.deleteMany();
+    await prisma.pedido.deleteMany();
+    await prisma.cliente.deleteMany();
+    await prisma.produto.deleteMany();
+    await prisma.valorEntrega.deleteMany();
+    await prisma.admin.deleteMany();
+    await prisma.configuracao.deleteMany();
 }
 
-await main()
+// Criando IDs com uuid
+const adminId = "11111111-1111-1111-1111-111111111111";
+const clienteId = "22222222-2222-2222-2222-222222222222";
+const bairroValverdeId = "33333333-3333-3333-3333-333333333331";
+const produtoVazioId = "44444444-4444-4444-4444-444444444441";
+const produtoGuaranaId = "44444444-4444-4444-4444-444444444442";
+const numPedido = "55555555-4444-4444-4444-555555555555"
+
+const admins: Prisma.AdminCreateManyInput[] = [
+  { id: adminId, email: "admin@admin.com", nome: "Administrador", senha: "admin#123" }
+]
+const configuracoes: Prisma.ConfiguracaoCreateManyInput[] = [
+  { tempoAdicionalMinutos: 30 }
+]
+
+const bairros: Prisma.ValorEntregaCreateManyInput[] = [
+  { id: bairroValverdeId, bairro: "Valverde", valor: 5.0, tempoEntregaMinutos: 10 },
+  { bairro: "Santo Antonio", valor: 5.0, tempoEntregaMinutos: 10 },
+  { bairro: "Balneário dos Prazeres/Z3", valor: 10.0, tempoEntregaMinutos: 15 },
+  { bairro: "Areal", valor: 15.0, tempoEntregaMinutos: 20 },
+  { bairro: "Centro", valor: 20.0, tempoEntregaMinutos: 25 }
+];
+
+const clientes: Prisma.ClienteCreateManyInput[] = [
+  { id: clienteId, nome: "João Souza", telefone: "53999999999", senha: "joao#123", rua: "Rua do Silício", numero: "10", bairroID: bairroValverdeId }
+];
+
+const produtos: Prisma.ProdutoCreateManyInput[] = [
+  { id: produtoVazioId, descricao: "Ala Minuta de Vazio", categoria: "Refeição", precoBase: 35.0, tempoPreparoMinutos: 15, adminID: adminId },
+  { descricao: "Ala Minuta de Picanha", categoria: "Refeição", precoBase: 48.0, tempoPreparoMinutos: 15, adminID: adminId },
+  { descricao: "Água mineral 500ml (com gás)", categoria: "Bebidas", precoBase: 5.0, tempoPreparoMinutos: 0, adminID: adminId },
+  { id: produtoGuaranaId, descricao: "Guaraná 350ml (normal)", categoria: "Bebidas", precoBase: 6.0, tempoPreparoMinutos: 0, adminID: adminId },
+  { descricao: "Coca-Cola 350ml (zero)", categoria: "Bebidas", precoBase: 6.0, tempoPreparoMinutos: 0, adminID: adminId }
+];
+
+const pedidos: Prisma.PedidoCreateManyInput[] = [
+    {
+    id: numPedido,
+    clienteID: clienteId,
+    status: "PENDENTE",
+    modalEntrega: "DELIVERY",
+    pagamento: "DINHEIRO",
+    valorTotal: 41.0,
+    tempoTotalEstimadoMinutos: 25,
+}];
+
+const itensPedidos: Prisma.ItensPedidoCreateManyInput[] = [
+    { pedidoID: numPedido, produtoID: produtoVazioId, quantidade: 1, precoProduto: 35.0 },
+    { pedidoID: numPedido, produtoID: produtoGuaranaId, quantidade: 1, precoProduto: 6.0 }
+];
+
+async function main() {
+    await limparBanco();
+    console.log("Banco de dados limpo com sucesso.");
+    await prisma.admin.createMany({ data: admins });
+    console.log(`${admins.length} Admin cadastrado.`);
+    await prisma.configuracao.createMany({ data: configuracoes });
+    console.log(`${configuracoes.length} Configuração cadastrada.`);
+    await prisma.valorEntrega.createMany({ data: bairros });
+    console.log(`${bairros.length} Bairros cadastrados.`);
+    await prisma.cliente.createMany({ data: clientes });
+    console.log(`${clientes.length} Cliente cadastrado.`);
+    await prisma.produto.createMany({ data: produtos });
+    console.log(`${produtos.length} Produtos cadastrados.`);
+    await prisma.pedido.createMany({ data: pedidos });
+    console.log(`${pedidos.length} Pedidos cadastrados no Kanban.`);
+    await prisma.itensPedido.createMany({ data: itensPedidos });
+    console.log(`${itensPedidos.length} Itens de Pedido vinculados.`);
+}
+
+main()
+  .then(async () => {
+    console.log("✅ Seed concluido.");
+    await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error("❌ Erro nas inclusões:", e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });
