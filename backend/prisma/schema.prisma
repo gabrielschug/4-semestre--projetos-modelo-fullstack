@@ -7,49 +7,104 @@ datasource db {
   provider = "postgresql"
 }
 
-model Marca {
-  id     Int     @id @default(autoincrement())
-  nome   String  @db.VarChar(30)
-  carros Carro[]
-
-  @@map("marcas")
+// Tabela para gerenciar configurações globais do restaurante
+model Configuracao {
+  id                    String @id @default(uuid())
+  tempoAdicionalMinutos Int    @default(0) 
 }
 
-model Carro {
-  id          Int          @id @default(autoincrement())
-  modelo      String       @db.VarChar(30)
-  ano         Int          @db.SmallInt
-  preco       Decimal      @db.Decimal(10, 2)
-  km          Int
-  foto        String
-  acessorios  String?
-  combustivel Combustiveis @default(FLEX)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  destaque    Boolean      @default(true)
-  marcaId     Int
-  marca       Marca        @relation(fields: [marcaId], references: [id])
+model Admin {
+  id       String    @id @default(uuid())
+  nome     String
+  email    String    @unique
+  senha    String
+  produtos Produto[]
+}
 
-  @@map("carros")
+model ValorEntrega {
+  id                  String    @id @default(uuid())
+  bairro              String    @unique
+  valor               Float
+  tempoEntregaMinutos Int       @default(30) // Tempo base para o bairro
+  clientes            Cliente[]
 }
 
 model Cliente {
-  id        String   @id @default(uuid()) @db.VarChar(36)
-  nome      String   @db.VarChar(60)
-  email     String   @db.VarChar(40)
-  senha     String   @db.VarChar(60)
-  cidade    String   @db.VarChar(30)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("clientes")
+  id       String       @id @default(uuid())
+  nome     String
+  telefone String       @unique
+  senha    String
+  rua      String
+  numero   String
+  obs      String?
+  
+  bairroID String
+  bairro   ValorEntrega @relation(fields: [bairroID], references: [id])
+  
+  pedidos  Pedido[]
 }
 
-enum Combustiveis {
-  FLEX
-  GASOLINA
-  ETANOL
-  DIESEL
-  ELETRICO
-  HIBRIDO
+model Produto {
+  id                   String        @id @default(uuid())
+  descricao            String
+  categoria            String
+  precoBase            Float
+  valorDesconto        Float?        @default(0)
+  disponibilidade      Boolean       @default(true)
+  especificacoes       String?
+  fotoUrl              String?
+  tempoPreparoMinutos  Int?          // Tempo base do prato
+  
+  adminID              String
+  admin                Admin         @relation(fields: [adminID], references: [id])
+  
+  itensPedidos         ItensPedido[]
+}
+
+model Pedido {
+  id                         String          @id @default(uuid())
+  status                     StatusPedido    @default(PENDENTE)
+  dataHora                   DateTime        @default(now())
+  modalEntrega               ModalEntrega
+  pagamento                  MetodoPagamento
+  valorTotal                 Float
+  tempoTotalEstimadoMinutos  Int             // Calculado e salvo no momento do pedido
+  anotacaoCliente            String?
+  anotacaoAdm                String?
+  
+  clienteID                  String
+  cliente                    Cliente         @relation(fields: [clienteID], references: [id])
+  
+  itens                      ItensPedido[]
+}
+
+model ItensPedido {
+  id           String  @id @default(uuid())
+  quantidade   Int
+  precoProduto Float   // Fotografia do preço exato no momento da compra
+  
+  pedidoID     String
+  pedido       Pedido  @relation(fields: [pedidoID], references: [id])
+  
+  produtoID    String
+  produto      Produto @relation(fields: [produtoID], references: [id])
+}
+
+enum StatusPedido {
+  PENDENTE
+  PREPARANDO
+  PRONTO
+  EM_ROTA
+  ENTREGUE
+  CANCELADO
+}
+
+enum ModalEntrega {
+  DELIVERY
+  RETIRADA
+}
+
+enum MetodoPagamento {
+  DINHEIRO
+  MAQUININHA_CARTAO
 }
