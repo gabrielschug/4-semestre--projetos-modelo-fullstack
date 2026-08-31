@@ -1,10 +1,13 @@
 {
-  "name": "back1",
+  "name": "restaurante-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "API REST para gerenciamento de pedidos e cardápio",
+  "main": "dist/server.js",
   "scripts": {
-    "dev": "npx tsx watch src/server.ts"
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "test": "node --test",
+    "start": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
