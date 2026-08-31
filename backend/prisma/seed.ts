@@ -1,4 +1,4 @@
-import { prisma } from "../lib/prisma";
+import { prisma } from "../src/lib/prisma";
 import { type Prisma } from "../generated/prisma/client"
 
 // 1. Limpar o banco para não duplicar
