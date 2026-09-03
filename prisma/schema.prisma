@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model valorBairro {
+  id     Int     @id @default(autoincrement())
+  bairro   String  @db.VarChar(30)
+  valor    Decimal @db.Decimal(10, 2)
+  tempoEntrega Int @db.SmallInt
+
+  @@map("valores_bairros")
+  clientes cliente[]
+}
+
+model configuracao {
+  id     Int     @id @default(autoincrement())
+  tempoAdicionalMinutos Int @db.SmallInt
+  @@map("configuracoes")
+}
+
+
+
+
+model cliente {
+  id          Int          @id @default(autoincrement())
+  nome        String       @db.VarChar(30)
+  telefone    String       @db.VarChar(15)
+  senha      String       @db.VarChar(60)
+  rua         String       @db.VarChar(50)
+  numero      String       @db.VarChar(10)
+  observacao  String?      @db.VarChar(100)
+  bairroId    Int
+  bairro      valorBairro  @relation(fields: [bairroId], references: [id])
+  createdAt   DateTime     @default(now())
+  @@map("clientes")
+  pedidos pedido[]
+}
+
+model admin {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  nome      String   @db.VarChar(60)
+  email     String   @db.VarChar(40)
+  senha     String   @db.VarChar(60)
+
+  @@map("admins")
+  produtos produto[]
+}
+
+model produto {
+  id          Int          @id @default(autoincrement())
+  nome        String       @db.VarChar(30)
+  descricao   String?      @db.VarChar(100)
+  categoria   String       @db.VarChar(30)
+  precoBase   Decimal      @db.Decimal(10, 2)
+  valorDesconto Decimal?     @db.Decimal(10, 2)
+  disponibilidade Boolean      @default(true)
+  especificacoes String?      @db.VarChar(100)
+  fotoUrl     String?      @db.VarChar(200)
+  tempoPreparoMinutos Int? @db.SmallInt
+  adminId     String       @db.VarChar(36)
+  admin       admin        @relation(fields: [adminId], references: [id])
+ 
+  @@map("produtos")
+  itensPedidos itensPedido[]
+}
+ model pedido {
+  id         Int          @id @default(autoincrement())
+  status     String       @db.VarChar(20)
+  dataHora   DateTime     @default(now())
+  modalEntrega String       @db.VarChar(20)
+  pagamento  Pagamentos
+  valorTotal Decimal      @db.Decimal(10, 2)
+  tempoEntregaMinutos Int @db.SmallInt
+  anotacaoCliente String?      @db.VarChar(100)
+  anotacaoAdmin String?      @db.VarChar(100)
+  clienteId  Int
+  cliente    cliente      @relation(fields: [clienteId], references: [id])
+  @@map("pedidos")
+   itensPedidos itensPedido[]
+}
+
+model itensPedido {
+  id         Int          @id @default(autoincrement())
+  quantidade Int          @db.SmallInt
+  precoProduto Decimal    @db.Decimal(10, 2)
+  pedidoId   Int
+  pedido     pedido       @relation(fields: [pedidoId], references: [id])
+  produtoId  Int
+  produto    produto      @relation(fields: [produtoId], references: [id])
+  @@map("itens_pedidos")
+}
+
+enum Pagamentos {
+  DINHEIRO
+  CREDITO
+  DEBITO
+  PIX
+}
+
