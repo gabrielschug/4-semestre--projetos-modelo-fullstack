@@ -1,16 +1,9 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-}
-
-// Tabela para gerenciar configurações globais do restaurante
-model Configuracao {
-  id                    String @id @default(uuid())
-  tempoAdicionalMinutos Int    @default(0) 
 }
 
 model Admin {
@@ -19,14 +12,18 @@ model Admin {
   email    String    @unique
   senha    String
   produtos Produto[]
+
+  @@map("admins")
 }
 
 model ValorEntrega {
   id                  String    @id @default(uuid())
   bairro              String    @unique
   valor               Float
-  tempoEntregaMinutos Int       @default(30) // Tempo base para o bairro
+  tempoEntregaMinutos Int       @default(30)
   clientes            Cliente[]
+
+  @@map("valores_entregas")
 }
 
 model Cliente {
@@ -37,57 +34,64 @@ model Cliente {
   rua      String
   numero   String
   obs      String?
-  
   bairroID String
   bairro   ValorEntrega @relation(fields: [bairroID], references: [id])
-  
   pedidos  Pedido[]
+
+  @@map("clientes")
 }
 
 model Produto {
-  id                   String        @id @default(uuid())
-  descricao            String
-  categoria            String
-  precoBase            Float
-  valorDesconto        Float?        @default(0)
-  disponibilidade      Boolean       @default(true)
-  especificacoes       String?
-  fotoUrl              String?
-  tempoPreparoMinutos  Int?          // Tempo base do prato
-  
-  adminID              String
-  admin                Admin         @relation(fields: [adminID], references: [id])
-  
-  itensPedidos         ItensPedido[]
+  id                  String        @id @default(uuid())
+  descricao           String
+  categoria           String
+  precoBase           Float
+  valorDesconto       Float?        @default(0)
+  disponibilidade     Boolean       @default(true)
+  especificacoes      String?
+  fotoUrl             String?
+  tempoPreparoMinutos Int?
+  adminID             String
+  itensPedidos        ItensPedido[]
+  admin               Admin         @relation(fields: [adminID], references: [id])
+
+  @@map("produtos")
 }
 
 model Pedido {
-  id                         String          @id @default(uuid())
-  status                     StatusPedido    @default(PENDENTE)
-  dataHora                   DateTime        @default(now())
-  modalEntrega               ModalEntrega
-  pagamento                  MetodoPagamento
-  valorTotal                 Float
-  tempoTotalEstimadoMinutos  Int             // Calculado e salvo no momento do pedido
-  anotacaoCliente            String?
-  anotacaoAdm                String?
-  
-  clienteID                  String
-  cliente                    Cliente         @relation(fields: [clienteID], references: [id])
-  
-  itens                      ItensPedido[]
+  id                        String          @id @default(uuid())
+  status                    StatusPedido    @default(PENDENTE)
+  dataHora                  DateTime        @default(now())
+  modalEntrega              ModalEntrega
+  pagamento                 MetodoPagamento
+  valorTotal                Float
+  tempoTotalEstimadoMinutos Int
+  anotacaoCliente           String?
+  anotacaoAdm               String?
+  clienteID                 String
+  itens                     ItensPedido[]
+  cliente                   Cliente         @relation(fields: [clienteID], references: [id])
+
+  @@map("pedidos")
 }
 
 model ItensPedido {
   id           String  @id @default(uuid())
   quantidade   Int
-  precoProduto Float   // Fotografia do preço exato no momento da compra
-  
+  precoProduto Float
   pedidoID     String
-  pedido       Pedido  @relation(fields: [pedidoID], references: [id])
-  
   produtoID    String
+  pedido       Pedido  @relation(fields: [pedidoID], references: [id])
   produto      Produto @relation(fields: [produtoID], references: [id])
+
+  @@map("itens_pedidos")
+}
+
+model Configuracao {
+  id                    String @id @default(uuid())
+  tempoAdicionalMinutos Int    @default(0)
+
+  @@map("configuracoes")
 }
 
 enum StatusPedido {
