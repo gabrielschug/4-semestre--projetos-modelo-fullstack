@@ -15,7 +15,7 @@ export function CardProduto({ data }: CardProdutoProps) {
 
   return (
     <Card
-      className="max-w-sm"
+      className="max-w-sm [&_img]:aspect-square [&_img]:object-cover [&_img]:w-full"
       imgAlt={data.descricao}
       imgSrc={data.fotoUrl}
     >
