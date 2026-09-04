@@ -9,7 +9,9 @@ export class ProdutoRepository {
 
   async listarProdutosDisponiveis() {
     return await this.prisma.produto.findMany({
-      where: { disponibilidade: true }
+      where: { disponibilidade: true },
+      orderBy: { categoria: "desc" },
+      
     });
   }
 }
