@@ -1,16 +1,16 @@
 import { Request, Response } from "express";
-import { PedidoService } from "../services/PedidosServices";
+import { PedidoService } from "../services/PedidoServices";
 
 export class PedidoController {
-  listar = async (req: Request, res: Response): Promise<Response> => {
+  constructor(private readonly service: PedidoService) {}
+  
+  async listarPedidos(res: Response): Promise<Response> {
     try {
-      const pedidoService = new PedidoService();
-      const pedidos = await pedidoService.obterPedidos();
-      
-      return res.status(200).json(pedidos);
+      const result = await this.service.listarPedidos();
+      return res.status(200).json(result);
     } catch (error) {
-      console.error("Erro ao listar pedidos:", error);
-      return res.status(500).json({ erro: "Erro interno ao carregar os pedidos." });
+      console.error(error);
+      return res.status(500).json({ error: "Erro ao obter pedidos", detalhe: String(error) });
     }
-  };
+  }
 }
