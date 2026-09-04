@@ -1,26 +1,24 @@
 import express from 'express'
 import cors from 'cors'
 
-import routesMarcas from './routes/marcas'
-import routesCarros from './routes/carros'
-import routesClientes from './routes/clientes'
-import routesLogin from './routes/login'
+import { produtoRouter } from './modules/produtos/routes/ProdutoRoute'
+import { pedidoRouter } from './modules/pedidos/routes/PedidoRouter'
+// import {adminRoutes} from './modules/admins/routes/adminRoutes'
 
 const app = express()
-const port = 3000
+const port = Number(process.env.PORT) || 3000
 
 app.use(express.json())
 app.use(cors())
 
-app.use("/marcas", routesMarcas)
-app.use("/carros", routesCarros)
-app.use("/clientes", routesClientes)
-app.use("/clientes/login", routesLogin)
+app.use("/produtos", produtoRouter)
+app.use("/pedidos", pedidoRouter)
+// app.use("/admins", adminsRoutes)
 
 app.get('/', (req, res) => {
-  res.send('API: Revenda de Veículos')
+  res.send('API: Restaurante')
 })
 
-app.listen(port, () => {
-  console.log(`Servidor rodando na porta: ${port}`)
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Servidor rodando na porta: ${port}`)
 })
