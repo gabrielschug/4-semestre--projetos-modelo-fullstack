@@ -1,22 +1,15 @@
-import { prisma } from "../../../lib/prisma";
+import { PrismaClient } from "@prisma/client";
 
 export class ProdutoRepository {
+  private prisma: PrismaClient;
+
+  constructor(prismaClient: PrismaClient) {
+    this.prisma = prismaClient;
+  }
 
   async listarProdutosDisponiveis() {
-    
-    return await prisma.produto.findMany({
-      where: { disponibilidade: true },
-      select: {
-        id: true,
-        descricao: true,
-        categoria: true,
-        precoBase: true,
-        valorDesconto: true,
-        especificacoes: true,
-        fotoUrl: true,
-        tempoPreparoMinutos: true,
-      },
-      orderBy: { categoria: 'asc' },
+    return await this.prisma.produto.findMany({
+      where: { disponibilidade: true }
     });
   }
 }
