@@ -1,21 +1,21 @@
-import { CardVeiculo } from "./components/CardVeiculo";
+import { CardProduto } from "./components/CardProduto";
 import { InputPesquisa } from "./components/InputPesquisa";
-import type { CarroType } from "./utils/CarroType";
+import type { ProdutoType } from "./utils/ProdutoType";
 import { useEffect, useState } from "react";
 import { useClienteStore } from "./context/ClienteContext"
 
 const apiUrl = import.meta.env.VITE_API_URL
 
 export default function App() {
-  const [carros, setCarros] = useState<CarroType[]>([])
+  const [produtos, setProdutos] = useState<ProdutoType[]>([])
   const { logaCliente } = useClienteStore()  
 
   useEffect(() => {
     async function buscaDados() {
-      const response = await fetch(`${apiUrl}/carros`)
+      const response = await fetch(`${apiUrl}/produtos`)
       const dados = await response.json()
 //      console.log(dados)
-      setCarros(dados)
+      setProdutos(dados)
     }
     buscaDados()
 
@@ -30,19 +30,19 @@ export default function App() {
     }    
   }, [])
 
-  const listaCarros = carros.map( carro => (
-    <CardVeiculo data={carro} key={carro.id} />
+  const listaProdutos = produtos.map( produto => (
+    <CardProduto data={produto} key={produto.id} />
   ))
 
   return (
     <>
-      <InputPesquisa setCarros={setCarros} />
-      <div className="max-w-7xl mx-auto">
-        <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
-          Veículos <span className="underline underline-offset-3 decoration-8 decoration-orange-400 dark:decoration-orange-600">em destaque</span>
+      <InputPesquisa setProdutos={setProdutos} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+        <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl ">
+          Seja bem-vindo ao <span className="underline underline-offset-3 decoration-8 decoration-orange-400 ">Restaurante Minuta Gaudéria</span>
         </h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-          {listaCarros}
+          {listaProdutos}
         </div>
       </div>
     </>
