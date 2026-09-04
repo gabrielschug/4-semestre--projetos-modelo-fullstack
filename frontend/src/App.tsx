@@ -1,5 +1,5 @@
 import { CardProduto } from "./components/CardProduto";
-import { InputPesquisa } from "./components/InputPesquisa";
+// import { InputPesquisa } from "./components/InputPesquisa";
 import type { ProdutoType } from "./utils/ProdutoType";
 import { useEffect, useState } from "react";
 import { useClienteStore } from "./context/ClienteContext"
@@ -36,10 +36,10 @@ export default function App() {
 
   return (
     <>
-      <InputPesquisa setProdutos={setProdutos} />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-        <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl ">
-          Seja bem-vindo ao <span className="underline underline-offset-3 decoration-8 decoration-orange-400 ">Restaurante Minuta Gaudéria</span>
+      {/* <InputPesquisa setProdutos={setProdutos} /> */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <h1 className="pt-8 mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl">
+          Seja bem-vindo ao <span className="underline underline-offset-3 decoration-8 decoration-cyan-400 ">###</span>
         </h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           {listaProdutos}
