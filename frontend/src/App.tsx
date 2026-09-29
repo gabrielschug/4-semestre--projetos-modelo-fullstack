@@ -1,5 +1,5 @@
 import { CardProduto } from "./components/CardProduto";
-// import { InputPesquisa } from "./components/InputPesquisa";
+import { InputPesquisa } from "./components/InputPesquisa";
 import type { ProdutoType } from "./utils/ProdutoType";
 import { useEffect, useState } from "react";
 import { useClienteStore } from "./context/ClienteContext";
@@ -54,20 +54,13 @@ export default function App() {
 
   return (
     <>
-      {/* <InputPesquisa setProdutos={setProdutos} /> */}
+      <InputPesquisa setProdutos={setProdutos} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
         <div>
-          {listaProdutosDestaques && (
-            <>
-              <h3 className="text-3xl font-bold text-heading my-2">
-                Temos <span className="text-fg-brand ">promoção para você</span>
-                !
-              </h3>
-              <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {listaProdutosDestaques}
-              </div>
-            </>
-          )}
+          <div className="my-4 mb-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {listaProdutosDestaques}
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {listaProdutosNormais}
           </div>
