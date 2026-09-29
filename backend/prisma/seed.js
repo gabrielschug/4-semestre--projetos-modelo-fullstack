@@ -1,4 +1,7 @@
+import bcrypt from "bcrypt";
 import { prisma } from "../src/lib/prisma";
+
+const quantidadeDeRodadasDeCriptografia = 10;
 // 1. Limpar o banco para não duplicar
 async function limparBanco() {
     await prisma.itensPedido.deleteMany();
@@ -16,8 +19,10 @@ const bairroValverdeId = "33333333-3333-3333-3333-333333333331";
 const produtoVazioId = "44444444-4444-4444-4444-444444444441";
 const produtoGuaranaId = "44444444-4444-4444-4444-444444444442";
 const numPedido = "55555555-4444-4444-4444-555555555555";
+const senhaAdminHash = await bcrypt.hash("admin#123", quantidadeDeRodadasDeCriptografia);
+const senhaClienteHash = await bcrypt.hash("joao#123", quantidadeDeRodadasDeCriptografia);
 const admins = [
-    { id: adminId, email: "admin@admin.com", nome: "Administrador", senha: "admin#123" }
+    { id: adminId, email: "admin@admin.com", nome: "Administrador", senha: senhaAdminHash }
 ];
 const configuracoes = [
     { tempoAdicionalMinutos: 30 }
@@ -30,7 +35,7 @@ const bairros = [
     { bairro: "Centro", valor: 20.0, tempoEntregaMinutos: 25 }
 ];
 const clientes = [
-    { id: clienteId, nome: "João Souza", telefone: "53999999999", senha: "joao#123", rua: "Rua do Silício", numero: "10", bairroID: bairroValverdeId }
+    { id: clienteId, nome: "João Souza", telefone: "53999999999", senha: senhaClienteHash, rua: "Rua do Silício", numero: "10", bairroID: bairroValverdeId }
 ];
 const produtos = [
     { id: produtoVazioId, descricao: "Ala Minuta de Vazio", categoria: "Refeição", precoBase: 35.0, tempoPreparoMinutos: 15, adminID: adminId },

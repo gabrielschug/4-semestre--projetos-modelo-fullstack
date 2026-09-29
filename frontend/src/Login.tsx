@@ -1,12 +1,12 @@
 import { useForm } from "react-hook-form"
 
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { toast } from "sonner"
 import { useClienteStore } from "./context/ClienteContext"
 
 type Inputs = {
-    email: string
+    telefone: string
     senha: string
     manter: boolean
 }
@@ -14,44 +14,41 @@ type Inputs = {
 const apiUrl = import.meta.env.VITE_API_URL
 
 export default function Login() {
-    const { register, handleSubmit } = useForm<Inputs>()    
+    const { register, handleSubmit, formState: { isSubmitting } } = useForm<Inputs>()
     const { logaCliente } = useClienteStore()
 
     const navigate = useNavigate()
 
     async function verificaLogin(data: Inputs) {
-        // alert(`${data.email} ${data.senha} ${data.manter}`)
-        const response = await 
-          fetch(`${apiUrl}/clientes/login`, {
-            headers: {"Content-Type": "application/json"},
-            method: "POST",
-            body: JSON.stringify({ email: data.email, senha: data.senha })
-          })
-        
-        // console.log(response)
-        if (response.status == 200) {
-            // toast.success("Ok!")            
-            const dados = await response.json()
+        try {
+            const response = await
+                fetch(`${apiUrl}clientes/login`, {
+                    headers: { "Content-Type": "application/json" },
+                    method: "POST",
+                    body: JSON.stringify({ telefone: data.telefone, senha: data.senha })
+                })
 
-            // "coloca" os dados do cliente no contexto
-            logaCliente(dados)
-            
-            // se o cliente indicou que quer se manter conectado
-            // salvamos os dados (id) dele em localStorage
-            if (data.manter) {
-                localStorage.setItem("clienteKey", dados.id)
-            } else {
-                // se indicou que não quer permanecer logado e tem
-                // uma chave (anteriormente) salva, remove-a
-                if (localStorage.getItem("clienteKey")) {
-                    localStorage.removeItem("clienteKey")
+            if (response.status == 200) {
+                const dados = await response.json()
+
+                logaCliente(dados)
+
+                if (data.manter) {
+                    localStorage.setItem("clienteKey", dados.id)
+                } else {
+                    if (localStorage.getItem("clienteKey")) {
+                        localStorage.removeItem("clienteKey")
+                    }
                 }
-            }
 
-            // carrega a página principal, após login do cliente
-            navigate("/")
-        } else {
-            toast.error("Erro... Login ou senha incorretos")
+                toast.success(`Bem-vindo(a), ${dados.nome}!`)
+                navigate("/")
+            } else {
+                toast.error("Telefone ou senha incorretos")
+            }
+        } catch (error) {
+            console.error(error)
+            toast.error("Não foi possível conectar ao servidor. Tente novamente.")
         }
     }
 
@@ -64,41 +61,42 @@ export default function Login() {
                         <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                             Dados de Acesso do Cliente
                         </h1>
-                        <form className="space-y-4 md:space-y-6" 
-                           onSubmit={handleSubmit(verificaLogin)} >
+                        <form className="space-y-4 md:space-y-6"
+                            onSubmit={handleSubmit(verificaLogin)} >
                             <div>
-                                <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Seu e-mail</label>
-                                <input type="email" id="email" 
-                                       className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                                       required 
-                                       {...register("email")} />
+                                <label htmlFor="telefone" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Telefone</label>
+                                <input type="tel" id="telefone"
+                                    placeholder="Ex: 53999999999"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    required
+                                    {...register("telefone", { required: true })} />
                             </div>
                             <div>
                                 <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Senha de Acesso</label>
-                                <input type="password" id="password" 
-                                       className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-                                       required 
-                                       {...register("senha")} />
+                                <input type="password" id="password"
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    required
+                                    {...register("senha", { required: true })} />
                             </div>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-start">
                                     <div className="flex items-center h-5">
-                                        <input id="remember" 
-                                               aria-describedby="remember" type="checkbox" 
-                                               className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800" 
-                                               {...register("manter")} />
+                                        <input id="remember"
+                                            aria-describedby="remember" type="checkbox"
+                                            className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"
+                                            {...register("manter")} />
                                     </div>
                                     <div className="ml-3 text-sm">
                                         <label htmlFor="remember" className="text-gray-500 dark:text-gray-300">Manter Conectado</label>
                                     </div>
                                 </div>
-                                <a href="#" className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500">Esqueceu sua senha?</a>
                             </div>
-                            <button type="submit" className="w-full text-white bg-orange-600 hover:bg-orange-700 focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                Entrar
+                            <button type="submit" disabled={isSubmitting}
+                                className="w-full text-white bg-orange-600 hover:bg-orange-700 focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 disabled:opacity-60">
+                                {isSubmitting ? "Entrando..." : "Entrar"}
                             </button>
                             <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                                Ainda não possui conta? <a href="#" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Cadastre-se</a>
+                                Ainda não possui conta? <Link to="/cadastro" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Cadastre-se</Link>
                             </p>
                         </form>
                     </div>
