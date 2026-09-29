@@ -4,9 +4,15 @@ import './index.css'
 
 import App from './App.tsx'
 import Login from './Login.tsx'
-// import Detalhes from './Detalhes.tsx'
+import Cadastro from './Cadastro.tsx'
 
 import Layout from './Layout.tsx'
+
+import AdminLayout from './admin/AdminLayout.tsx'
+import AdminLogin from './admin/AdminLogin.tsx'
+import AdminPainel from './admin/AdminPainel.tsx'
+import AdminRotaProtegida from './admin/AdminRotaProtegida.tsx'
+
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 const rotas = createBrowserRouter([
@@ -16,7 +22,22 @@ const rotas = createBrowserRouter([
     children: [
       { index: true, element: <App /> },
       { path: 'login', element: <Login /> },
-      // { path: 'detalhes/:carroId', element: <Detalhes /> },
+      { path: 'cadastro', element: <Cadastro /> },
+    ],
+  },
+  {
+    path: '/admin',
+    element: <AdminLayout />,
+    children: [
+      { path: 'login', element: <AdminLogin /> },
+      {
+        path: 'painel',
+        element: (
+          <AdminRotaProtegida>
+            <AdminPainel />
+          </AdminRotaProtegida>
+        ),
+      },
     ],
   },
 ])

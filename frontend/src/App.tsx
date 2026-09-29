@@ -8,29 +8,37 @@ const apiUrl = import.meta.env.VITE_API_URL
 
 export default function App() {
   const [produtos, setProdutos] = useState<ProdutoType[]>([])
-  const { logaCliente } = useClienteStore()  
+  const { logaCliente } = useClienteStore()
 
   useEffect(() => {
     async function buscaDados() {
-      const response = await fetch(`${apiUrl}/produtos`)
+      const response = await fetch(`${apiUrl}produtos`)
       const dados = await response.json()
-//      console.log(dados)
       setProdutos(dados)
     }
     buscaDados()
 
     async function buscaCliente(id: string) {
-      const response = await fetch(`${apiUrl}/clientes/${id}`)
-      const dados = await response.json()
-      logaCliente(dados)
+      try {
+        const response = await fetch(`${apiUrl}clientes/${id}`)
+        if (response.status === 200) {
+          const dados = await response.json()
+          logaCliente(dados)
+        } else {
+          localStorage.removeItem("clienteKey")
+        }
+      } catch (error) {
+        console.error(error)
+      }
     }
-    if (localStorage.getItem("clienteKey")) {
-      const idCliente = localStorage.getItem("clienteKey")
-      buscaCliente(idCliente as string)
-    }    
+
+    const idCliente = localStorage.getItem("clienteKey")
+    if (idCliente) {
+      buscaCliente(idCliente)
+    }
   }, [])
 
-  const listaProdutos = produtos.map( produto => (
+  const listaProdutos = produtos.map(produto => (
     <CardProduto data={produto} key={produto.id} />
   ))
 
