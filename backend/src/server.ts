@@ -3,7 +3,8 @@ import cors from 'cors'
 
 import { produtoRouter } from './modules/produtos/routes/ProdutoRoute'
 import { pedidoRouter } from './modules/pedidos/routes/PedidoRouter'
-// import {adminRoutes} from './modules/admins/routes/adminRoutes'
+import { clienteRouter } from './modules/clientes/routes/ClienteRouter'
+import { adminRouter } from './modules/admins/routes/AdminRouter'
 
 const app = express()
 const port = Number(process.env.PORT) || 3000
@@ -13,7 +14,8 @@ app.use(cors())
 
 app.use("/produtos", produtoRouter)
 app.use("/pedidos", pedidoRouter)
-// app.use("/admins", adminsRoutes)
+app.use("/clientes", clienteRouter)
+app.use("/admins", adminRouter)
 
 app.get('/', (req, res) => {
   res.send('API: Restaurante')
