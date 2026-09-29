@@ -10,6 +10,8 @@ const repository = new ProdutoRepository(prisma);
 const service = new ProdutoService(repository);
 const controller = new ProdutoController(service);
 
-produtoRouter.get("/",(req, res) =>controller.listarProdutosDisponiveis(res))
-
+produtoRouter.get("/", (req, res) => controller.listarProdutosDisponiveis(res));
+produtoRouter.get("/pesquisa/:termo", (req, res) =>
+  controller.pesquisarProdutos(req, res),
+);
 export { produtoRouter };
