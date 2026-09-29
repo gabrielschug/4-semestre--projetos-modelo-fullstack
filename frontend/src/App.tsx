@@ -1,56 +1,69 @@
 import { CardProduto } from "./components/CardProduto";
-// import { InputPesquisa } from "./components/InputPesquisa";
+import { InputPesquisa } from "./components/InputPesquisa";
 import type { ProdutoType } from "./utils/ProdutoType";
 import { useEffect, useState } from "react";
-import { useClienteStore } from "./context/ClienteContext"
+import { useClienteStore } from "./context/ClienteContext";
 
-const apiUrl = import.meta.env.VITE_API_URL
+const apiUrl = import.meta.env.VITE_API_URL;
 
 export default function App() {
-  const [produtos, setProdutos] = useState<ProdutoType[]>([])
-  const { logaCliente } = useClienteStore()
+  const [produtos, setProdutos] = useState<ProdutoType[]>([]);
+  const { logaCliente } = useClienteStore();
 
   useEffect(() => {
     async function buscaDados() {
-      const response = await fetch(`${apiUrl}produtos`)
-      const dados = await response.json()
-      setProdutos(dados)
+      const response = await fetch(`${apiUrl}/produtos`);
+      const dados = await response.json();
+      setProdutos(dados);
     }
-    buscaDados()
+    buscaDados();
 
     async function buscaCliente(id: string) {
       try {
-        const response = await fetch(`${apiUrl}clientes/${id}`)
+        const response = await fetch(`${apiUrl}clientes/${id}`);
         if (response.status === 200) {
-          const dados = await response.json()
-          logaCliente(dados)
+          const dados = await response.json();
+          logaCliente(dados);
         } else {
-          localStorage.removeItem("clienteKey")
+          localStorage.removeItem("clienteKey");
         }
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
     }
 
-    const idCliente = localStorage.getItem("clienteKey")
+    const idCliente = localStorage.getItem("clienteKey");
     if (idCliente) {
-      buscaCliente(idCliente)
+      buscaCliente(idCliente);
     }
-  }, [])
+  }, []);
 
-  const listaProdutos = produtos.map(produto => (
-    <CardProduto data={produto} key={produto.id} />
-  ))
+  const listaProdutosNormais = produtos.map(
+    (produto) =>
+      produto.valorDesconto === 0 && (
+        <CardProduto data={produto} key={produto.id} />
+      ),
+  );
+
+  const listaProdutosDestaques = produtos.map(
+    (produto) =>
+      produto.valorDesconto > 0 && (
+        <CardProduto data={produto} key={produto.id} />
+      ),
+  );
 
   return (
     <>
-      {/* <InputPesquisa setProdutos={setProdutos} /> */}
+      <InputPesquisa setProdutos={setProdutos} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <h1 className="pt-8 mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl">
-          Seja bem-vindo ao <span className="underline underline-offset-3 decoration-8 decoration-cyan-400 ">###</span>
-        </h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-          {listaProdutos}
+        <div>
+          <div className="my-4 mb-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {listaProdutosDestaques}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            {listaProdutosNormais}
+          </div>
         </div>
       </div>
     </>
