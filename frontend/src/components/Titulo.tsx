@@ -1,10 +1,18 @@
 import { Link } from "react-router-dom";
 import { useClienteStore } from "../context/ClienteContext";
 import { useNavigate } from "react-router-dom";
+import { useCarrinho } from "../context/useCarrinhoStore";
 
 export default function Titulo() {
-  const { cliente, deslogaCliente } = useClienteStore();
   const navigate = useNavigate();
+
+  const { cliente, deslogaCliente } = useClienteStore();
+  const { itens } = useCarrinho();
+
+  const totalItens = itens.reduce(
+    (acumulador, item) => acumulador + item.quantidade,
+    0,
+  );
 
   function clienteSair() {
     if (confirm("Confirma saída do sistema?")) {
@@ -23,11 +31,21 @@ export default function Titulo() {
           to="/"
           className="flex items-center space-x-3 rtl:space-x-reverse"
         >
-          <img src="./logo.png" className="h-12" alt="Logo Herbie" />
-          <span className="self-center text-2xl font-semibold whitespace-nowrap ">
+          <img src="./logo.png" className="h-12" alt="Logo" />
+          <span className="self-center text-md md:text-2xl font-semibold whitespace-nowrap ">
             Restaurante Minuta Campeira
           </span>
         </Link>
+        {totalItens > 0 && (
+          <div className="relative">
+            <span className="text-white bg-brand-strong p-2 rounded-md">
+              Carrinho
+            </span>
+            <div className=" absolute -top-4 -right-3 flex h-6 w-6 items-center justify-center rounded-full bg-brand text-xs font-bold text-white shadow-lg">
+              {totalItens}
+            </div>
+          </div>
+        )}
         <button
           data-collapse-toggle="navbar-solid-bg"
           type="button"
@@ -62,7 +80,7 @@ export default function Titulo() {
                     to="/propostas"
                     className="text-white font-bold bg-gray-600 hover:bg-gray-700 focus:ring-2 focus:outline-none focus:ring-gray-400 rounded-lg text-sm w-full sm:w-auto px-3 py-2 text-center"
                   >
-                    Minhas Propostas
+                    Pedidos
                   </Link>
                   &nbsp;&nbsp;
                   <span
