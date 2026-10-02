@@ -15,4 +15,8 @@ export class ProdutoService {
       return await this.produtoRepository.pesquisaPrecoMaximo(termoNumero);
     }
   }
+
+  async PesquisarProdutoPorId(id: string) {
+    return await this.produtoRepository.PesquisarProdutoPorId(id);
+  }
 }
