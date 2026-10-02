@@ -2,12 +2,13 @@ import { Link } from "react-router-dom";
 import { useClienteStore } from "../context/ClienteContext";
 import { useNavigate } from "react-router-dom";
 import { useCarrinho } from "../context/useCarrinhoStore";
+import { Button } from "flowbite-react";
 
 export default function Titulo() {
   const navigate = useNavigate();
 
   const { cliente, deslogaCliente } = useClienteStore();
-  const { itens } = useCarrinho();
+  const { itens, abrirDrawer } = useCarrinho();
 
   const totalItens = itens.reduce(
     (acumulador, item) => acumulador + item.quantidade,
@@ -36,16 +37,16 @@ export default function Titulo() {
             Restaurante Minuta Campeira
           </span>
         </Link>
+
         {totalItens > 0 && (
-          <div className="relative">
-            <span className="text-white bg-brand-strong p-2 rounded-md">
-              Carrinho
-            </span>
-            <div className=" absolute -top-4 -right-3 flex h-6 w-6 items-center justify-center rounded-full bg-brand text-xs font-bold text-white shadow-lg">
+          <Button className="relative" onClick={abrirDrawer}>
+            <span className="text-white p-2 rounded-md">Carrinho</span>
+            <div className=" absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white border-2 border-brand-brand text-xs font-bold text-brand-strong shadow-lg">
               {totalItens}
             </div>
-          </div>
+          </Button>
         )}
+
         <button
           data-collapse-toggle="navbar-solid-bg"
           type="button"
@@ -96,7 +97,7 @@ export default function Titulo() {
                     to="/login"
                     className="block py-2 px-3 md:p-0 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700"
                   >
-                    Identifique-se
+                    Login
                   </Link>
                 </>
               )}

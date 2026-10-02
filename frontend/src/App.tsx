@@ -4,6 +4,7 @@ import type { ProdutoType } from "./utils/ProdutoType";
 import { useEffect, useState } from "react";
 import { useClienteStore } from "./context/ClienteContext";
 import ModalDetalhes from "./ModalDetalhes";
+import { CarrinhoDrawer } from "./components/CarrinhoDrawer";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -21,7 +22,7 @@ export default function App() {
 
   useEffect(() => {
     async function buscaDados() {
-      const response = await fetch(`${apiUrl}produtos`);
+      const response = await fetch(`${apiUrl}/produtos`);
       const dados = await response.json();
       setProdutos(dados);
     }
@@ -29,7 +30,7 @@ export default function App() {
 
     async function buscaCliente(id: string) {
       try {
-        const response = await fetch(`${apiUrl}clientes/${id}`);
+        const response = await fetch(`${apiUrl}/clientes/${id}`);
         if (response.status === 200) {
           const dados = await response.json();
           logaCliente(dados);
@@ -83,11 +84,14 @@ export default function App() {
           </div>
         </div>
       </div>
+
       <ModalDetalhes
         produto={produtoSelecionado}
         isOpen={modalAberto}
         onClose={() => setModalAberto(false)}
       />
+
+      <CarrinhoDrawer />
     </>
   );
 }
