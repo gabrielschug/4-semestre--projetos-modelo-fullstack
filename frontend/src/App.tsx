@@ -3,16 +3,25 @@ import { InputPesquisa } from "./components/InputPesquisa";
 import type { ProdutoType } from "./utils/ProdutoType";
 import { useEffect, useState } from "react";
 import { useClienteStore } from "./context/ClienteContext";
+import ModalDetalhes from "./ModalDetalhes";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export default function App() {
   const [produtos, setProdutos] = useState<ProdutoType[]>([]);
   const { logaCliente } = useClienteStore();
+  const [modalAberto, setModalAberto] = useState(false);
+  const [produtoSelecionado, setProdutoSelecionado] =
+    useState<ProdutoType | null>(null);
+
+  const handleCliqueProduto = (produto: ProdutoType) => {
+    setProdutoSelecionado(produto);
+    setModalAberto(true);
+  };
 
   useEffect(() => {
     async function buscaDados() {
-      const response = await fetch(`${apiUrl}/produtos`);
+      const response = await fetch(`${apiUrl}produtos`);
       const dados = await response.json();
       setProdutos(dados);
     }
@@ -41,14 +50,22 @@ export default function App() {
   const listaProdutosNormais = produtos.map(
     (produto) =>
       produto.valorDesconto === 0 && (
-        <CardProduto data={produto} key={produto.id} />
+        <CardProduto
+          data={produto}
+          key={produto.id}
+          aoClicar={handleCliqueProduto}
+        />
       ),
   );
 
   const listaProdutosDestaques = produtos.map(
     (produto) =>
       produto.valorDesconto > 0 && (
-        <CardProduto data={produto} key={produto.id} />
+        <CardProduto
+          data={produto}
+          key={produto.id}
+          aoClicar={handleCliqueProduto}
+        />
       ),
   );
 
@@ -66,6 +83,11 @@ export default function App() {
           </div>
         </div>
       </div>
+      <ModalDetalhes
+        produto={produtoSelecionado}
+        isOpen={modalAberto}
+        onClose={() => setModalAberto(false)}
+      />
     </>
   );
 }
