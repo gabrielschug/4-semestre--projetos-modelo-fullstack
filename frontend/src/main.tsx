@@ -6,7 +6,6 @@ import App from "./App.tsx";
 import Login from "./Login.tsx";
 import Cadastro from "./Cadastro.tsx";
 import Layout from "./Layout.tsx";
-import Detalhes from "./Detalhes.tsx";
 import MeusPedidos from "./MeusPedidos.tsx";
 
 // ----------------- Rotas de Admin
@@ -24,7 +23,6 @@ const rotas = createBrowserRouter([
     children: [
       { index: true, element: <App /> },
       { path: "login", element: <Login /> },
-      { path: "produtos/:produtoId", element: <Detalhes /> },
       { path: "meusPedidos", element: <MeusPedidos /> },
       { path: "cadastro", element: <Cadastro /> },
     ],
