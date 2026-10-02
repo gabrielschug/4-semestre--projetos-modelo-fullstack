@@ -29,8 +29,8 @@ model ValorEntrega {
 model Cliente {
   id       String       @id @default(uuid())
   nome     String
-  telefone String       @unique
-  senha    String
+  telefone String
+  senha    String?
   rua      String
   numero   String
   obs      String?
