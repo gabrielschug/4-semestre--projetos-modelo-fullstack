@@ -10,6 +10,7 @@ const repository = new PedidoRepository(prisma);
 const service = new PedidoService(repository);
 const controller = new PedidoController(service);
 
-pedidoRouter.get("/",(req, res) =>controller.listarPedidos(res))
-
+pedidoRouter.get("/", controller.listarPedidos.bind(PedidoController));
+// pedidoRouter.post("/", controller.criarPedido.bind(PedidoController));
+pedidoRouter.post("/", (req, res) => controller.criarPedido(req, res));
 export { pedidoRouter };
