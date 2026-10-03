@@ -11,6 +11,7 @@ export interface ItemCarrinho {
 interface CarrinhoState {
   itens: ItemCarrinho[];
   adicionarAoCarrinho: (item: ItemCarrinho) => void;
+  limparCarrinho: () => void;
   abrirDrawer: () => void;
   fecharDrawer: () => void;
   drawerAberto: boolean;
@@ -23,6 +24,7 @@ export const useCarrinho = create<CarrinhoState>((set) => ({
     set((state) => ({
       itens: [...state.itens, novoItem],
     })),
+  limparCarrinho: () => set({ itens: [] }),
   abrirDrawer: () => set({ drawerAberto: true }),
   fecharDrawer: () => set({ drawerAberto: false }),
 }));

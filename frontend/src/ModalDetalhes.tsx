@@ -2,6 +2,7 @@ import { Modal, ModalBody, ModalHeader, ModalFooter } from "flowbite-react";
 import type { ProdutoType } from "./utils/ProdutoType";
 import { useState, useEffect } from "react";
 import { useCarrinho } from "./context/useCarrinhoStore";
+import { toast } from "sonner";
 
 interface ModalDetalhesProps {
   produto: ProdutoType | null;
@@ -45,6 +46,10 @@ export default function ModalDetalhes({
       style: "currency",
       currency: "BRL",
     }).format(valor);
+
+  const produtoAdicionado = () => {
+    toast.info("Produto adicinado ao carrinho");
+  };
 
   return (
     <Modal dismissible show={isOpen} onClose={onClose} size="3xl">
@@ -104,7 +109,10 @@ export default function ModalDetalhes({
 
               <button
                 className="flex-1 h-12 bg-[var(--color-brand)] hover:bg-[var(--color-brand-strong)] text-white rounded-md px-4 flex items-center justify-between transition-colors mx-auto"
-                onClick={handleAdicionar}
+                onClick={() => {
+                  handleAdicionar();
+                  produtoAdicionado();
+                }}
               >
                 <span className="text-sm font-medium">Adicionar</span>
                 <span className="text-sm font-medium">

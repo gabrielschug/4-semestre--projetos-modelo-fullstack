@@ -1,5 +1,6 @@
 import { Card } from "flowbite-react";
 import type { ProdutoType } from "../utils/ProdutoType";
+import { toast } from "sonner";
 
 interface CardProdutoProps {
   data: ProdutoType;
