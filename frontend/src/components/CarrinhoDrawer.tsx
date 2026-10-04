@@ -154,17 +154,17 @@ export function CarrinhoDrawer() {
     <div key={item.id_item_carrinho} className="flex justify-between">
       {item.quantidade > 1 ? (
         <>
-          <span className="text-gray-800">
+          <span className="text-secundaria">
             {item.produto.descricao} (x{item.quantidade})
           </span>
-          <span className="text-gray-900">
+          <span className="text-secundaria">
             {formatarMoeda(item.produto.precoBase * item.quantidade)}
           </span>
         </>
       ) : (
         <>
-          <span className="text-gray-800">{item.produto.descricao}</span>
-          <span className="text-gray-900">
+          <span className="text-secundaria">{item.produto.descricao}</span>
+          <span className="text-secundaria">
             {formatarMoeda(item.produto.precoBase)}
           </span>
         </>
@@ -178,14 +178,14 @@ export function CarrinhoDrawer() {
         open={drawerAberto}
         onClose={fecharDrawer}
         position="right"
-        className="w-full md:w-[450px] p-0 flex flex-col"
+        className="w-full bg-fundo p-0 text-secundaria md:w-[450px] flex flex-col"
       >
       <DrawerHeader
         title="MEU PEDIDO"
         titleIcon={() => <></>}
-        className="p-4"
+        className="bg-fundo p-4 text-secundaria"
       />
-      <DrawerItems className="p-4 overflow-y-auto flex-1">
+      <DrawerItems className="flex-1 overflow-y-auto bg-fundo p-4">
         <div className="flex justify-end mb-2">
           <Button
             size="xs"
@@ -201,34 +201,34 @@ export function CarrinhoDrawer() {
           </Button>
         </div>
 
-        <div className="bg-gray-100 text-white rounded-lg p-4 mb-6 space-y-3">
+        <div className="mb-6 space-y-3 rounded-lg bg-secundaria/5 p-4">
           {itensPedido}
           <div className="flex justify-between">
-            <span className="text-gray-800"></span>
-            <span className="text-gray-900"></span>
+            <span className="text-secundaria"></span>
+            <span className="text-secundaria"></span>
           </div>
-          <hr className="border-gray-600" />
+          <hr className="border-secundaria/15" />
           <div className="flex justify-between">
-            <span className="text-gray-800">Subtotal</span>
-            <span className="text-gray-900">{formatarMoeda(subtotal)}</span>
+            <span className="text-secundaria">Subtotal</span>
+            <span className="text-secundaria">{formatarMoeda(subtotal)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-800">Entrega</span>
-            <span className="text-gray-900">{formatarMoeda(taxaEntrega)}</span>
+            <span className="text-secundaria">Entrega</span>
+            <span className="text-secundaria">{formatarMoeda(taxaEntrega)}</span>
           </div>
-          <hr className="border-gray-600" />
+          <hr className="border-secundaria/15" />
           <div className="flex justify-between text-lg font-bold">
-            <span className="text-gray-800">Total</span>
-            <span className="text-gray-900">{formatarMoeda(total)}</span>
+            <span className="text-secundaria">Total</span>
+            <span className="text-secundaria">{formatarMoeda(total)}</span>
           </div>
         </div>
 
         <form id="form-checkout" onSubmit={handleSubmit(enviarPedido)}>
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-3">Seus Dados</h3>
+            <h3 className="text-lg font-bold text-secundaria mb-3">Seus Dados</h3>
             <div className="space-y-3">
               <div>
-                <Label htmlFor="nome" value="Nome Completo *" />
+                <Label htmlFor="nome">Nome Completo *</Label>
                 <TextInput
                   id="nome"
                   placeholder="Ex: João Silva"
@@ -243,7 +243,7 @@ export function CarrinhoDrawer() {
               </div>
 
               <div>
-                <Label htmlFor="telefone" value="WhatsApp *" />
+                <Label htmlFor="telefone">WhatsApp *</Label>
                 <TextInput
                   id="telefone"
                   placeholder="(53) 99999-9999"
@@ -259,7 +259,7 @@ export function CarrinhoDrawer() {
             </div>
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-3">
+            <h3 className="text-lg font-bold text-secundaria mb-3">
               Como deseja receber?
             </h3>
             <fieldset className="flex flex-col gap-3">
@@ -267,6 +267,7 @@ export function CarrinhoDrawer() {
                 <Radio
                   id="delivery"
                   value="DELIVERY"
+                  className="text-primaria focus:ring-primaria"
                   {...register("modalEntrega")}
                 />
                 <Label htmlFor="delivery">Entrega no meu endereço</Label>
@@ -275,6 +276,7 @@ export function CarrinhoDrawer() {
                 <Radio
                   id="retirada"
                   value="RETIRADA"
+                  className="text-primaria focus:ring-primaria"
                   {...register("modalEntrega")}
                 />
                 <Label htmlFor="retirada">Vou buscar no balcão</Label>
@@ -284,8 +286,12 @@ export function CarrinhoDrawer() {
             {modalEntregaAtual === "DELIVERY" && (
               <div className="mt-4 space-y-3 p-4 rounded-lg">
                 <div>
-                  <Label htmlFor="bairro" value="Bairro *" />
-                  <Select id="bairro" {...register("bairroID")}>
+                  <Label htmlFor="bairro">Bairro *</Label>
+                  <Select
+                    id="bairro"
+                    className="focus:border-primaria focus:ring-primaria"
+                    {...register("bairroID")}
+                  >
                     <option value="">Selecione seu bairro...</option>
                     {listaBairros.map((bairro) => (
                       <option key={bairro.id} value={bairro.id}>
@@ -301,7 +307,7 @@ export function CarrinhoDrawer() {
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="col-span-2">
-                    <Label htmlFor="rua" value="Rua *" />
+                    <Label htmlFor="rua">Rua *</Label>
                     <TextInput
                       id="rua"
                       placeholder="Nome da rua"
@@ -314,7 +320,7 @@ export function CarrinhoDrawer() {
                     )}
                   </div>
                   <div>
-                    <Label htmlFor="numero" value="Nº *" />
+                    <Label htmlFor="numero">Nº *</Label>
                     <TextInput
                       id="numero"
                       placeholder="Número"
@@ -331,7 +337,7 @@ export function CarrinhoDrawer() {
             )}
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-3">
+            <h3 className="text-lg font-bold text-secundaria mb-3">
               Forma de Pagamento
             </h3>
             <fieldset className="flex flex-col gap-3">
@@ -339,6 +345,7 @@ export function CarrinhoDrawer() {
                 <Radio
                   id="maquininha"
                   value="MAQUININHA_CARTAO"
+                  className="text-primaria focus:ring-primaria"
                   {...register("pagamento")}
                 />
                 <Label htmlFor="maquininha">
@@ -350,6 +357,7 @@ export function CarrinhoDrawer() {
                   id="dinheiro"
                   value="DINHEIRO"
                   defaultChecked
+                  className="text-primaria focus:ring-primaria"
                   {...register("pagamento")}
                 />
                 <Label htmlFor="dinheiro">Dinheiro</Label>
@@ -357,12 +365,14 @@ export function CarrinhoDrawer() {
             </fieldset>
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-3">
+            <h3 className="text-lg font-bold text-secundaria mb-3">
               Observações (Opcional)
             </h3>
             <div className="space-y-3">
               <div>
-                <Label htmlFor="anotacaoGeral" value="" />
+                <Label htmlFor="anotacaoGeral" className="sr-only">
+                  Observações do pedido
+                </Label>
                 <TextInput
                   id="anotacaoGeral"
                   placeholder="Ex: Troco para R$ 100"
@@ -375,19 +385,17 @@ export function CarrinhoDrawer() {
       </DrawerItems>
 
       {/* Footer Fixo */}
-      <div className="p-4 border-t bg-white flex gap-3">
+      <div className="flex gap-3 border-t border-secundaria/10 bg-fundo p-4">
         <Button
-          color="light"
           onClick={fecharDrawer}
-          className="flex-1 cursor-pointer"
+          className="flex-1 cursor-pointer border border-secundaria/20 bg-fundo text-secundaria hover:bg-secundaria/5 focus:ring-primaria"
         >
           Continuar Comprando
         </Button>
         <Button
           type="submit"
           form="form-checkout"
-          color="default"
-          className="flex-1 font-bold cursor-pointer"
+          className="flex-1 cursor-pointer bg-primaria font-bold text-white hover:bg-secundaria focus:ring-primaria"
         >
           Confirmar Pedido
         </Button>

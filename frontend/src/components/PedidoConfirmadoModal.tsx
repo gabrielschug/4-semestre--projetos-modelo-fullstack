@@ -31,30 +31,30 @@ export function PedidoConfirmadoModal({
         <div className="text-center px-2 pb-2 sm:px-4">
           {/* Ícone de Sucesso */}
           <CircleCheck
-            className="mx-auto mb-4 h-16 w-16 text-[#c2410c] dark:text-[#ea580c]"
+            className="mx-auto mb-4 h-16 w-16 text-primaria"
             strokeWidth={2.5}
           />
 
-          <h2 className="mb-3 text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="mb-3 text-2xl font-bold text-secundaria">
             Pedido confirmado!
           </h2>
 
           {/* Número do pedido com break-all para não quebrar o layout no mobile */}
-          <p className="mb-6 text-base text-gray-600 dark:text-gray-400">
+          <p className="mb-6 text-base text-secundaria/70">
             Número do pedido:{" "}
-            <strong className="break-all font-bold text-gray-900 dark:text-white">
+            <strong className="break-all font-bold text-secundaria">
               {pedidoId}
             </strong>
           </p>
 
           {/* Previsão - com flex-wrap para telas muito pequenas */}
-          <div className="mb-4 flex flex-wrap items-center justify-center gap-2 text-base text-gray-700 dark:text-gray-300">
-            <Clock3 className="h-5 w-5 shrink-0 text-[#c2410c] dark:text-[#ea580c]" />
+          <div className="mb-4 flex flex-wrap items-center justify-center gap-2 text-base text-secundaria/80">
+            <Clock3 className="h-5 w-5 shrink-0 text-primaria" />
             <span>
               {modalEntrega === "DELIVERY"
                 ? "Previsão de entrega:"
                 : "Previsão de preparo:"}{" "}
-              <strong className="font-bold text-gray-900 dark:text-white">
+              <strong className="font-bold text-secundaria">
                 {tempoEstimadoMinutos}{" "}
                 {tempoEstimadoMinutos === 1 ? "minuto" : "minutos"}
               </strong>
@@ -62,8 +62,8 @@ export function PedidoConfirmadoModal({
           </div>
 
           {/* Aviso WhatsApp */}
-          <div className="mb-8 flex items-center justify-center gap-3 text-base text-gray-600 dark:text-gray-400">
-            <MessageCircle className="h-5 w-5 shrink-0 text-green-600 dark:text-green-500" />
+          <div className="mb-8 flex items-center justify-center gap-3 text-base text-secundaria/70">
+            <MessageCircle className="h-5 w-5 shrink-0 text-secundaria" />
             <p className="leading-snug">
               Enviaremos atualizações sobre seu pedido pelo WhatsApp informado.
             </p>
@@ -74,7 +74,7 @@ export function PedidoConfirmadoModal({
             {clienteLogado && (
               <Button
                 onClick={acompanharPedido}
-                className="w-full bg-[#c2410c] text-white hover:bg-[#9a3412] focus:ring-4 focus:ring-orange-300 dark:bg-[#ea580c] dark:hover:bg-[#c2410c] sm:w-auto transition-colors"
+                className="w-full bg-primaria text-white hover:bg-secundaria focus:ring-4 focus:ring-primaria/30 sm:w-auto transition-colors"
               >
                 Acompanhar pedido
               </Button>
@@ -82,7 +82,7 @@ export function PedidoConfirmadoModal({
             <Button
               color="alternative"
               onClick={onClose}
-              className="w-full sm:w-auto"
+              className="w-full border border-secundaria/20 bg-fundo text-secundaria hover:bg-secundaria/5 sm:w-auto"
             >
               Fechar
             </Button>

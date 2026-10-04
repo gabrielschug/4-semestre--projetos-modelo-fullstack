@@ -1,6 +1,5 @@
 import { Card } from "flowbite-react";
 import type { ProdutoType } from "../utils/ProdutoType";
-import { toast } from "sonner";
 
 interface CardProdutoProps {
   data: ProdutoType;
@@ -31,16 +30,16 @@ export function CardProduto({ data, aoClicar }: CardProdutoProps) {
           aoClicar(data);
         }}
       >
-        <h5 className="text-xl font-semibold tracking-tight text-gray-900">
+        <h5 className="text-xl font-semibold tracking-tight text-secundaria">
           {data.descricao}
         </h5>
       </a>
 
       <div className="mb-5 mt-2.5 flex items-center justify-between">
-        <span className="rounded bg-brand-soft px-2.5 py-0.5 text-xs font-semibold text-brand-strong">
+        <span className="rounded bg-primaria/10 px-2.5 py-0.5 text-xs font-semibold text-primaria">
           {data.categoria}
         </span>
-        <span className="text-sm font-medium text-gray-500 ">
+        <span className="text-sm font-medium text-secundaria/65">
           ⏳ {data.tempoPreparoMinutos} min
         </span>
       </div>
@@ -49,11 +48,11 @@ export function CardProduto({ data, aoClicar }: CardProdutoProps) {
         <div className="flex flex-col">
           {/* Exibe o preço original riscado caso exista desconto */}
           {data.valorDesconto > 0 && (
-            <span className="text-sm line-through text-gray-500 ">
+            <span className="text-sm text-secundaria/60 line-through">
               {formatarMoeda(data.precoBase)}
             </span>
           )}
-          <span className="text-3xl font-bold text-gray-900 ">
+          <span className="text-3xl font-bold text-secundaria">
             {formatarMoeda(precoFinal)}
           </span>
         </div>
@@ -63,8 +62,8 @@ export function CardProduto({ data, aoClicar }: CardProdutoProps) {
           onClick={() => aoClicar(data)}
           className={`rounded-lg px-5 py-2.5 text-center text-sm font-medium text-white focus:outline-none focus:ring-4 ${
             data.disponibilidade
-              ? "bg-brand hover:bg-brand-strong"
-              : "cursor-not-allowed bg-gray-400"
+              ? "bg-primaria hover:bg-secundaria"
+              : "cursor-not-allowed bg-secundaria/40"
           }`}
         >
           {data.disponibilidade ? "Comprar" : "Esgotado"}

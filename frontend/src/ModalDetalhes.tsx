@@ -53,11 +53,13 @@ export default function ModalDetalhes({
 
   return (
     <Modal dismissible show={isOpen} onClose={onClose} size="3xl">
-      <ModalHeader className=" border-none">{produto.descricao}</ModalHeader>
+      <ModalHeader className="border-none text-secundaria">
+        {produto.descricao}
+      </ModalHeader>
       <ModalBody className="p-0 overflow-hidden">
         <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
           {/* Imagem - Topo no mobile, esquerda no desktop */}
-          <div className="w-full md:w-1/2 h-56 md:h-auto bg-gray-100 shrink-0">
+          <div className="w-full md:w-1/2 h-56 md:h-auto bg-white shrink-0">
             <img
               src={produto.fotoUrl}
               alt={produto.descricao}
@@ -67,42 +69,42 @@ export default function ModalDetalhes({
 
           <div className="w-full md:w-1/2 flex flex-col bg-white">
             <div className="p-4 md:p-6 overflow-y-auto flex-1">
-              <p className="text-sm text-gray-500 mb-4 leading-relaxed">
+              <p className="text-sm text-secundaria/65 mb-4 leading-relaxed">
                 {produto.especificacoes}
               </p>
-              <p className="text-lg font-medium text-gray-800 mb-6">
+              <p className="text-lg font-medium text-secundaria mb-6">
                 {formatarMoeda(produto.precoBase)}
               </p>
 
               <div className="mt-4">
                 <div className="flex justify-between items-center mb-2">
-                  <label className="text-base font-medium text-gray-800">
+                  <label className="text-base font-medium text-secundaria">
                     Algum comentário?
                   </label>
                 </div>
                 <textarea
                   value={observacao}
                   onChange={(event) => setObservacao(event.target.value)}
-                  className="w-full rounded-md border border-gray-300 bg-gray-50 p-3 text-sm text-gray-700 shadow-sm focus:border-[var(--color-brand)] focus:ring-[var(--color-brand)] focus:bg-white resize-none transition-colors"
+                  className="w-full resize-none rounded-md border border-secundaria/20 bg-white p-3 text-sm text-secundaria shadow-sm transition-colors placeholder:text-secundaria/50 focus:border-primaria focus:bg-fundo focus:ring-primaria"
                   rows={2}
                   placeholder="Ex: tirar a cebola, maionese à parte etc."
                 ></textarea>
               </div>
             </div>
 
-            <div className="p-4 border-t border-gray-100 bg-white flex items-center justify-between gap-4 mt-auto">
-              <div className="flex items-center justify-between border border-gray-300 rounded-md h-12 w-28 px-2 bg-white">
+            <div className="p-4 border-t border-secundaria/10 bg-white flex items-center justify-between gap-4 mt-auto">
+              <div className="flex items-center justify-between border border-secundaria/20 rounded-md h-12 w-28 px-2 bg-fundo">
                 <button
-                  className="text-[var(--color-fg-brand)] text-2xl w-8 h-8 flex items-center justify-center hover:bg-[var(--color-brand-softer)] rounded pb-1 transition-colors"
+                  className="text-secundaria text-2xl w-8 h-8 flex items-center justify-center hover:bg-primaria/10 rounded pb-1 transition-colors"
                   onClick={() => setCount(count > 1 ? count - 1 : 1)}
                 >
                   -
                 </button>
-                <span className="text-gray-800 font-medium text-sm">
+                <span className="text-secundaria font-medium text-sm">
                   {count}
                 </span>
                 <button
-                  className="text-[var(--color-fg-brand)] text-2xl w-8 h-8 flex items-center justify-center hover:bg-[var(--color-brand-softer)] rounded pb-1 transition-colors"
+                  className="text-secundaria text-2xl w-8 h-8 flex items-center justify-center hover:bg-primaria/10 rounded pb-1 transition-colors"
                   onClick={() => setCount(count + 1)}
                 >
                   +
@@ -110,7 +112,7 @@ export default function ModalDetalhes({
               </div>
 
               <button
-                className="flex-1 h-12 bg-[var(--color-brand)] hover:bg-[var(--color-brand-strong)] text-white rounded-md px-4 flex items-center justify-between transition-colors mx-auto"
+                className="flex-1 h-12 bg-primaria hover:bg-secundaria text-white rounded-md px-4 flex items-center justify-between transition-colors mx-auto focus:outline-none focus:ring-4 focus:ring-primaria/30"
                 onClick={() => {
                   handleAdicionar();
                   produtoAdicionado();

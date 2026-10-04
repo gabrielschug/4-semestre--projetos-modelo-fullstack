@@ -71,19 +71,33 @@ export default function App() {
   );
 
   return (
-    <>
+    <div className="min-h-screen bg-fundo">
       <InputPesquisa setProdutos={setProdutos} />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <div>
-          <div className="my-4 mb-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {listaProdutosDestaques}
-          </div>
+      <main className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
+        <div className="space-y-10">
+          <section className="my-4">
+            <div className="mb-5 flex items-center gap-3">
+              <h2 className="text-2xl font-bold tracking-tight text-secundaria">
+                Ofertas especiais
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+              {listaProdutosDestaques}
+            </div>
+          </section>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {listaProdutosNormais}
-          </div>
+          <section className="border-t border-secundaria/10 pt-8">
+            <div className="mb-5 flex items-center gap-3">
+              <h2 className="text-2xl font-bold tracking-tight text-secundaria">
+                Cardápio
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+              {listaProdutosNormais}
+            </div>
+          </section>
         </div>
-      </div>
+      </main>
 
       <ModalDetalhes
         produto={produtoSelecionado}
@@ -92,6 +106,6 @@ export default function App() {
       />
 
       <CarrinhoDrawer />
-    </>
+    </div>
   );
 }

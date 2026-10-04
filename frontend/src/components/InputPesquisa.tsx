@@ -36,21 +36,21 @@ export function InputPesquisa({ setProdutos }: InputPesquisaProps) {
   }
 
   return (
-    <div className="flex mx-4 md:mx-auto max-w-5xl m-2 items-center">
+    <div className="flex mx-4 md:mx-auto max-w-5xl m-2 items-center pt-4">
       <form className="flex-1" onSubmit={handleSubmit(enviaPesquisa)}>
         <div className="relative">
           <div className="absolute inset-y-0 start-0 flex items-center ps-1 pointer-events-none"></div>
           <input
             type="search"
             id="default-search"
-            className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            className="block w-full rounded-lg border border-secundaria/20 bg-white p-4 ps-10 text-sm text-secundaria placeholder:text-secundaria/50 focus:border-primaria focus:ring-primaria"
             placeholder="Busque o item"
             required
             {...register("termo")}
           />
           <button
             type="submit"
-            className="text-blue-600 absolute end-1 bottom-2 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            className="absolute end-1 bottom-2 rounded-lg bg-primaria px-4 py-2 text-sm font-medium text-white hover:bg-secundaria focus:outline-none focus:ring-4 focus:ring-primaria/30"
           >
             <Search />
           </button>
@@ -59,7 +59,7 @@ export function InputPesquisa({ setProdutos }: InputPesquisaProps) {
 
       <button
         type="button"
-        className="ms-2 focus:outline-none text-white bg-gray-500 hover:bg-blue-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-6 py-4 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
+        className="ms-2 rounded-lg bg-secundaria px-6 py-4 text-sm font-medium text-white hover:bg-primaria focus:outline-none focus:ring-4 focus:ring-primaria/30"
         onClick={mostraDestaques}
       >
         Todos
