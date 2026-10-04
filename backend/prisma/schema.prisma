@@ -79,6 +79,7 @@ model ItensPedido {
   id           String  @id @default(uuid())
   quantidade   Int
   precoProduto Float
+  avaliacao    Int?    @db.SmallInt
   pedidoID     String
   produtoID    String
   pedido       Pedido  @relation(fields: [pedidoID], references: [id])
