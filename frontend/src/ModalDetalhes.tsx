@@ -30,7 +30,7 @@ export default function ModalDetalhes({
 
   const handleAdicionar = () => {
     const novoItem = {
-      item_item_carrinho: crypto.randomUUID(),
+      id_item_carrinho: crypto.randomUUID(),
       produto: produto,
       quantidade: count,
       observacao: observacao,
@@ -48,7 +48,7 @@ export default function ModalDetalhes({
     }).format(valor);
 
   const produtoAdicionado = () => {
-    toast.info("Produto adicinado ao carrinho");
+    toast.info("Produto adicionado ao carrinho");
   };
 
   return (
@@ -81,8 +81,10 @@ export default function ModalDetalhes({
                   </label>
                 </div>
                 <textarea
+                  value={observacao}
+                  onChange={(event) => setObservacao(event.target.value)}
                   className="w-full rounded-md border border-gray-300 bg-gray-50 p-3 text-sm text-gray-700 shadow-sm focus:border-[var(--color-brand)] focus:ring-[var(--color-brand)] focus:bg-white resize-none transition-colors"
-                  rows="2" //bug funcionando
+                  rows={2}
                   placeholder="Ex: tirar a cebola, maionese à parte etc."
                 ></textarea>
               </div>
