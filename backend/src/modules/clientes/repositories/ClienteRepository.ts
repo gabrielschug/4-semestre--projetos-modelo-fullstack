@@ -10,7 +10,7 @@ export class ClienteRepository {
   }
 
   async buscarPorTelefone(telefone: string) {
-    return await this.prisma.cliente.findUnique({
+    return await this.prisma.cliente.findFirst({
       where: { telefone },
       include: { bairro: true },
     })

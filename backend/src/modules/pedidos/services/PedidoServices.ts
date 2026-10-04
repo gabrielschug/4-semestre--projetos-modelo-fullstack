@@ -8,16 +8,42 @@ export class PedidoService {
     return await this.pedidoRepository.listarPedidos();
   }
 
+  async listarPedidosDoCliente(clienteID: string) {
+    return await this.pedidoRepository.listarPedidosDoCliente(clienteID);
+  }
+
+  async cancelarPedido(clienteID: string, pedidoID: string) {
+    return await this.pedidoRepository.cancelarPedido(clienteID, pedidoID);
+  }
+
+  async avaliarItemPedido(
+    clienteID: string,
+    pedidoID: string,
+    itemID: string,
+    avaliacao: number,
+  ) {
+    return await this.pedidoRepository.avaliarItemPedido(
+      clienteID,
+      pedidoID,
+      itemID,
+      avaliacao,
+    );
+  }
+
   async criarPedido(dados: CriarPedidoDTO) {
     const anotacoesItens = dados.pedido.itens
-      .filter((item) => item.observacao)
+      .filter((item) => item.observacao?.trim())
       .map(
-        (item) => `${item.quantidade}x ${item.nomeProduto}: ${item.observacao}`,
+        (item) =>
+          `${item.quantidade}x ${item.nomeProduto}: ${item.observacao?.trim()}`,
       )
       .join(" | ");
-    const anotacaoFinal = dados.pedido.anotacaoGeral
-      ? `${dados.pedido.anotacaoGeral} | Detalhes: ${anotacoesItens}`
-      : `${anotacoesItens}`;
+    const anotacoes = [
+      dados.pedido.anotacaoGeral?.trim() &&
+        `Geral: ${dados.pedido.anotacaoGeral.trim()}`,
+      anotacoesItens && `Detalhes: ${anotacoesItens}`,
+    ].filter((anotacao): anotacao is string => Boolean(anotacao));
+    const anotacaoFinal = anotacoes.join(" | ");
 
     const novoPedido = await this.pedidoRepository.criarPedidoComCliente(
       dados,

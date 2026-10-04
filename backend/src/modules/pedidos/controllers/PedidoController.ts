@@ -1,6 +1,12 @@
 import { Request, Response } from "express";
+import { z } from "zod";
 import { PedidoService } from "../services/PedidoServices";
 import { CriarPedidoDTO } from "../types/PedidosType";
+
+const clienteIdSchema = z.string().uuid();
+const avaliacaoSchema = z.object({
+  avaliacao: z.number().int().min(1).max(5),
+});
 
 export class PedidoController {
   constructor(private readonly PedidoService: PedidoService) {}
@@ -17,6 +23,96 @@ export class PedidoController {
     }
   }
 
+  async listarPedidosDoCliente(req: Request, res: Response): Promise<Response> {
+    try {
+      const clienteID = clienteIdSchema.safeParse(req.params.clienteId);
+      if (!clienteID.success) {
+        return res.status(400).json({ error: "ID do cliente inválido" });
+      }
+
+      const result = await this.PedidoService.listarPedidosDoCliente(
+        clienteID.data,
+      );
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(500)
+        .json({ error: "Erro ao obter os pedidos do cliente" });
+    }
+  }
+
+  async cancelarPedido(req: Request, res: Response): Promise<Response> {
+    const clienteID = clienteIdSchema.safeParse(req.params.clienteId);
+    const pedidoID = z.string().uuid().safeParse(req.params.pedidoId);
+    if (!clienteID.success || !pedidoID.success) {
+      return res.status(400).json({ error: "Identificação inválida" });
+    }
+
+    try {
+      const resultado = await this.PedidoService.cancelarPedido(
+        clienteID.data,
+        pedidoID.data,
+      );
+
+      if (resultado.resultado === "NAO_ENCONTRADO") {
+        return res.status(404).json({ error: "Pedido não encontrado" });
+      }
+      if (resultado.resultado === "NAO_CANCELAVEL") {
+        return res.status(409).json({
+          error: "Somente pedidos pendentes podem ser cancelados",
+        });
+      }
+
+      return res.status(200).json({ mensagem: "Pedido cancelado" });
+    } catch (error) {
+      console.error("Erro ao cancelar pedido:", error);
+      return res.status(500).json({ error: "Erro ao cancelar o pedido" });
+    }
+  }
+
+  async avaliarItemPedido(req: Request, res: Response): Promise<Response> {
+    const clienteID = clienteIdSchema.safeParse(req.params.clienteId);
+    const pedidoID = z.string().uuid().safeParse(req.params.pedidoId);
+    const itemID = z.string().uuid().safeParse(req.params.itemId);
+    const body = avaliacaoSchema.safeParse(req.body);
+    if (!clienteID.success || !pedidoID.success || !itemID.success) {
+      return res.status(400).json({ error: "Identificação inválida" });
+    }
+    if (!body.success) {
+      return res.status(400).json({ error: "A avaliação deve ser de 1 a 5 estrelas" });
+    }
+
+    try {
+      const resultado = await this.PedidoService.avaliarItemPedido(
+        clienteID.data,
+        pedidoID.data,
+        itemID.data,
+        body.data.avaliacao,
+      );
+
+      if (resultado.resultado === "NAO_ENCONTRADO") {
+        return res.status(404).json({ error: "Pedido não encontrado" });
+      }
+      if (resultado.resultado === "ITEM_NAO_ENCONTRADO") {
+        return res.status(404).json({ error: "Item não encontrado neste pedido" });
+      }
+      if (resultado.resultado === "PEDIDO_NAO_ENTREGUE") {
+        return res.status(409).json({
+          error: "Você poderá avaliar os produtos após a entrega do pedido",
+        });
+      }
+
+      return res.status(200).json({
+        mensagem: "Avaliação registrada",
+        avaliacao: resultado.avaliacao,
+      });
+    } catch (error) {
+      console.error("Erro ao avaliar item do pedido:", error);
+      return res.status(500).json({ error: "Erro ao registrar avaliação" });
+    }
+  }
+
   async criarPedido(req: Request, res: Response) {
     try {
       const dados: CriarPedidoDTO = req.body;
@@ -26,6 +122,7 @@ export class PedidoController {
       return res.status(201).json({
         mensagem: "Pedido criado com sucesso!",
         pedidoId: pedido.id,
+        tempoTotalEstimadoMinutos: pedido.tempoTotalEstimadoMinutos,
       });
     } catch (error: any) {
       console.error("Erro ao criar pedido:", error);
