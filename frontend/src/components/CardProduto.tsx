@@ -1,12 +1,18 @@
 import { Card } from "flowbite-react";
 import type { ProdutoType } from "../utils/ProdutoType";
+import { AvaliacaoEstrelas } from "./AvaliacaoEstrelas";
 
 interface CardProdutoProps {
   data: ProdutoType;
   aoClicar: (produto: ProdutoType) => void;
+  avaliacaoMedia: number | undefined;
 }
 
-export function CardProduto({ data, aoClicar }: CardProdutoProps) {
+export function CardProduto({
+  data,
+  aoClicar,
+  avaliacaoMedia,
+}: CardProdutoProps) {
   // Calcula o preço final aplicando o desconto
   const precoFinal = data.precoBase - data.valorDesconto;
 
@@ -43,6 +49,8 @@ export function CardProduto({ data, aoClicar }: CardProdutoProps) {
           ⏳ {data.tempoPreparoMinutos} min
         </span>
       </div>
+
+      <AvaliacaoEstrelas media={avaliacaoMedia} />
 
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
