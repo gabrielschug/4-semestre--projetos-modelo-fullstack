@@ -6,6 +6,7 @@ import { Button } from "flowbite-react";
 
 export default function Titulo() {
   const navigate = useNavigate();
+  const {limparCarrinho} = useCarrinho();
 
   const { cliente, deslogaCliente } = useClienteStore();
   const { itens, abrirDrawer } = useCarrinho();
@@ -90,7 +91,9 @@ export default function Titulo() {
                   &nbsp;&nbsp;
                   <span
                     className="cursor-pointer font-bold text-secundaria/70 hover:text-primaria"
-                    onClick={clienteSair}
+                    onClick={()=> {
+                      clienteSair();
+                      limparCarrinho()}}
                   >
                     Sair
                   </span>
