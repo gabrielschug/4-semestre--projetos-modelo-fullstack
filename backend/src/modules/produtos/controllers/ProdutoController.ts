@@ -1,4 +1,8 @@
 import { Request, Response } from "express";
+import {
+  produtoIdSchema,
+  termoPesquisaSchema,
+} from "../schemas/ProdutoSchema";
 import { ProdutoService } from "../services/ProdutoService";
 
 export class ProdutoController {
@@ -18,10 +22,13 @@ export class ProdutoController {
   }
 
   async PesquisarProdutoPorId(req: Request, res: Response): Promise<Response> {
-    try {
-      const { id } = req.params;
+    const id = produtoIdSchema.safeParse(req.params.id);
+    if (!id.success) {
+      return res.status(400).json({ error: "ID do produto inválido" });
+    }
 
-      const result = await this.service.PesquisarProdutoPorId(id);
+    try {
+      const result = await this.service.PesquisarProdutoPorId(id.data);
       return res.status(200).json(result);
     } catch (error) {
       console.error(error);
@@ -33,9 +40,13 @@ export class ProdutoController {
   }
 
   async pesquisarProdutos(req: Request, res: Response) {
+    const termo = termoPesquisaSchema.safeParse(req.params.termo);
+    if (!termo.success) {
+      return res.status(400).json({ error: "Termo de pesquisa inválido" });
+    }
+
     try {
-      const { termo } = req.params;
-      const produtos = await this.service.pesquisar(termo);
+      const produtos = await this.service.pesquisar(termo.data);
 
       return res.status(200).json(produtos);
     } catch (error) {
