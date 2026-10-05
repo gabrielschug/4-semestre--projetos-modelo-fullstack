@@ -1,5 +1,5 @@
 {
-  "name": "restaurante-api",
+  "name": "minuta-campeira-api",
   "version": "1.0.0",
   "description": "API REST para gerenciamento de pedidos e cardápio",
   "main": "dist/server.js",
