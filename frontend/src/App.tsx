@@ -5,11 +5,18 @@ import { useEffect, useState } from "react";
 import { useClienteStore } from "./context/ClienteContext";
 import ModalDetalhes from "./ModalDetalhes";
 import { CarrinhoDrawer } from "./components/CarrinhoDrawer";
+import { toast } from "sonner";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
+interface AvaliacaoProduto {
+  produtoID: string;
+  avaliacaoMedia: number;
+}
+
 export default function App() {
   const [produtos, setProdutos] = useState<ProdutoType[]>([]);
+  const [avaliacoes, setAvaliacoes] = useState<Record<string, number>>({});
   const { logaCliente } = useClienteStore();
   const [modalAberto, setModalAberto] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] =
@@ -27,6 +34,31 @@ export default function App() {
       setProdutos(dados);
     }
     buscaDados();
+
+    async function buscaAvaliacoes() {
+      try {
+        const response = await fetch(`${apiUrl}/itens-pedido/avaliacoes`);
+        if (!response.ok) {
+          throw new Error(
+            `Falha ao buscar avaliações: HTTP ${response.status}`,
+          );
+        }
+
+        const dados: AvaliacaoProduto[] = await response.json();
+        setAvaliacoes(
+          Object.fromEntries(
+            dados.map(({ produtoID, avaliacaoMedia }) => [
+              produtoID,
+              avaliacaoMedia,
+            ]),
+          ),
+        );
+      } catch (error) {
+        console.error("Erro ao buscar avaliações dos produtos:", error);
+        toast.error("Não foi possível carregar as avaliações dos produtos.");
+      }
+    }
+    buscaAvaliacoes();
 
     async function buscaCliente(id: string) {
       try {
@@ -46,7 +78,7 @@ export default function App() {
     if (idCliente) {
       buscaCliente(idCliente);
     }
-  }, []);
+  }, [logaCliente]);
 
   const listaProdutosNormais = produtos.map(
     (produto) =>
@@ -55,6 +87,7 @@ export default function App() {
           data={produto}
           key={produto.id}
           aoClicar={handleCliqueProduto}
+          avaliacaoMedia={avaliacoes[produto.id]}
         />
       ),
   );
@@ -66,6 +99,7 @@ export default function App() {
           data={produto}
           key={produto.id}
           aoClicar={handleCliqueProduto}
+          avaliacaoMedia={avaliacoes[produto.id]}
         />
       ),
   );
@@ -101,6 +135,11 @@ export default function App() {
 
       <ModalDetalhes
         produto={produtoSelecionado}
+        avaliacaoMedia={
+          produtoSelecionado
+            ? avaliacoes[produtoSelecionado.id]
+            : undefined
+        }
         isOpen={modalAberto}
         onClose={() => setModalAberto(false)}
       />

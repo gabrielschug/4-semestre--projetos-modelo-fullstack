@@ -12,10 +12,10 @@ export const criarPedidoSchema = z.object({
   }),
   pedido: z.object({
     modalEntrega: z.enum(["DELIVERY", "RETIRADA"], {
-      required_error: "Modalidade de entrega é obrigatória",
+      error: "Modalidade de entrega é obrigatória",
     }),
     pagamento: z.enum(["DINHEIRO", "MAQUININHA_CARTAO"], {
-      required_error: "Forma de pagamento é obrigatória",
+      error: "Forma de pagamento é obrigatória",
     }),
     valorTotal: z.number().positive("O valor total deve ser positivo"),
     anotacaoGeral: z.string().optional(),

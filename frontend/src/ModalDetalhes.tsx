@@ -3,15 +3,18 @@ import type { ProdutoType } from "./utils/ProdutoType";
 import { useState, useEffect } from "react";
 import { useCarrinho } from "./context/useCarrinhoStore";
 import { toast } from "sonner";
+import { AvaliacaoEstrelas } from "./components/AvaliacaoEstrelas";
 
 interface ModalDetalhesProps {
   produto: ProdutoType | null;
+  avaliacaoMedia: number | undefined;
   isOpen: boolean;
   onClose: () => void;
 }
 
 export default function ModalDetalhes({
   produto,
+  avaliacaoMedia,
   isOpen,
   onClose,
 }: ModalDetalhesProps) {
@@ -75,6 +78,8 @@ export default function ModalDetalhes({
               <p className="text-lg font-medium text-secundaria mb-6">
                 {formatarMoeda(produto.precoBase)}
               </p>
+
+              <AvaliacaoEstrelas media={avaliacaoMedia} />
 
               <div className="mt-4">
                 <div className="flex justify-between items-center mb-2">
