@@ -6,6 +6,7 @@ import { pedidoRouter } from "./modules/pedidos/routes/PedidoRouter";
 import { clienteRouter } from "./modules/clientes/routes/ClienteRouter";
 import { adminRouter } from "./modules/admins/routes/AdminRouter";
 import { bairrosRouter } from "./modules/bairros/routes/BairrosRouter";
+import { itensPedidoRouter } from "./modules/itensPedido/routes/ItensPedidoRouter";
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
@@ -19,6 +20,7 @@ app.use("/clientes", clienteRouter);
 app.use("/admins", adminRouter);
 app.use("/valores_entregas", adminRouter);
 app.use("/bairros", bairrosRouter);
+app.use("/itens-pedido", itensPedidoRouter);
 
 app.get("/", (req, res) => {
   res.send("API: Restaurante");
