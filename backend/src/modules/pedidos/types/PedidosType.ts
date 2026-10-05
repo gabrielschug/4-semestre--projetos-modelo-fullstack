@@ -1,9 +1,7 @@
-import {z} from "zod"
+import { z } from "zod";
 
-import {planoSchema} from "../schemas/pedidoSchema"
+import { criarPedidoSchema } from "../schemas/PedidoSchema";
 
-export type CriarPedidosInput = z.infer<typeof planoSchema>
-
-export type ModalEntrega = "DELIVERY" | "RETIRADA"
-
-export type MetodoPagamento = "DINHEIRO" |"MAQUININHA_CARTAO"
+// DTO (Data Transfer Object)
+// z.infer extrai a tipagem do Schema. Se mudar a regra no Zod, o DTO atualiza automatico
+export type CriarPedidoDTO = z.infer<typeof criarPedidoSchema>;

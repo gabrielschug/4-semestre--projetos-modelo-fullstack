@@ -15,6 +15,12 @@ export class ProdutoRepository {
     });
   }
 
+  async PesquisarProdutoPorId(id: string) {
+    return await this.prisma.produto.findFirst({
+      where: { id: id, disponibilidade: true },
+    });
+  }
+
   async pesquisarTexto(termo: string) {
     return await this.prisma.produto.findMany({
       where: {

@@ -17,6 +17,21 @@ export class ProdutoController {
     }
   }
 
+  async PesquisarProdutoPorId(req: Request, res: Response): Promise<Response> {
+    try {
+      const { id } = req.params;
+
+      const result = await this.service.PesquisarProdutoPorId(id);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        error: "Erro ao obter o produto específico",
+        detalhe: String(error),
+      });
+    }
+  }
+
   async pesquisarProdutos(req: Request, res: Response) {
     try {
       const { termo } = req.params;
