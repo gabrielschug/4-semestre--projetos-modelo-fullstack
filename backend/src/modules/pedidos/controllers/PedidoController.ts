@@ -7,11 +7,19 @@ const clienteIdSchema = z.string().uuid();
 const avaliacaoSchema = z.object({
   avaliacao: z.number().int().min(1).max(5),
 });
+const statusPedidoSchema = z.enum([
+  "PENDENTE",
+  "PREPARANDO",
+  "PRONTO",
+  "EM_ROTA",
+  "ENTREGUE",
+  "CANCELADO",
+]);
 
 export class PedidoController {
   constructor(private readonly PedidoService: PedidoService) {}
 
-  async listarPedidos(res: Response): Promise<Response> {
+  async listarPedidos(_req: Request, res: Response): Promise<Response> {
     try {
       const result = await this.PedidoService.listarPedidos();
       return res.status(200).json(result);
@@ -32,6 +40,46 @@ export class PedidoController {
       return res.status(500).json({
         error: "Erro ao obter quantidades de pedidos por status",
       });
+    }
+  }
+
+  async atualizarStatusPedido(req: Request, res: Response): Promise<Response> {
+    const pedidoID = clienteIdSchema.safeParse(req.params.pedidoId);
+    const body = z
+      .object({ status: statusPedidoSchema })
+      .safeParse(req.body);
+    if (!pedidoID.success) {
+      return res.status(400).json({ error: "ID do pedido inválido" });
+    }
+    if (!body.success) {
+      return res.status(400).json({ error: "Status do pedido inválido" });
+    }
+
+    try {
+      const resultado = await this.PedidoService.atualizarStatusPedido(
+        pedidoID.data,
+        body.data.status,
+      );
+      if (resultado.resultado === "NAO_ENCONTRADO") {
+        return res.status(404).json({ error: "Pedido não encontrado" });
+      }
+      if (resultado.resultado === "TRANSICAO_INVALIDA") {
+        return res
+          .status(409)
+          .json({ error: "Essa mudança de status não é permitida" });
+      }
+      if (resultado.resultado === "CONFLITO") {
+        return res.status(409).json({
+          error: "O pedido foi atualizado por outra pessoa. Atualize o quadro.",
+        });
+      }
+
+      return res.status(200).json({ mensagem: "Status do pedido atualizado" });
+    } catch (error) {
+      console.error("Erro ao atualizar status do pedido:", error);
+      return res
+        .status(500)
+        .json({ error: "Erro ao atualizar o status do pedido" });
     }
   }
 

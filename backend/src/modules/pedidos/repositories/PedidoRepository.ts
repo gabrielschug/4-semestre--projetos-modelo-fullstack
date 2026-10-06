@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type StatusPedido } from "@prisma/client";
 import { CriarPedidoDTO } from "../types/PedidosType";
 
 export class PedidoRepository {
@@ -9,7 +9,54 @@ export class PedidoRepository {
   }
 
   async listarPedidos() {
-    return await this.prisma.pedido.findMany({ include: { itens: true } });
+    return await this.prisma.pedido.findMany({
+      orderBy: { dataHora: "desc" },
+      select: {
+        id: true,
+        status: true,
+        dataHora: true,
+        tempoTotalEstimadoMinutos: true,
+        modalEntrega: true,
+        valorTotal: true,
+        anotacaoCliente: true,
+        cliente: {
+          select: {
+            nome: true,
+            telefone: true,
+            rua: true,
+            numero: true,
+            bairro: { select: { bairro: true } },
+          },
+        },
+        itens: {
+          select: {
+            id: true,
+            quantidade: true,
+            precoProduto: true,
+            produto: { select: { descricao: true } },
+          },
+        },
+      },
+    });
+  }
+
+  async buscarStatusPedido(id: string) {
+    return await this.prisma.pedido.findUnique({
+      where: { id },
+      select: { status: true, modalEntrega: true },
+    });
+  }
+
+  async atualizarStatusPedido(
+    id: string,
+    statusAtual: StatusPedido,
+    novoStatus: StatusPedido,
+  ) {
+    const resultado = await this.prisma.pedido.updateMany({
+      where: { id, status: statusAtual },
+      data: { status: novoStatus },
+    });
+    return resultado.count > 0;
   }
 
   async contarPedidosPorStatus() {
