@@ -8,6 +8,10 @@ export class PedidoService {
     return await this.pedidoRepository.listarPedidos();
   }
 
+  async contarPedidosPorStatus() {
+    return await this.pedidoRepository.contarPedidosPorStatus();
+  }
+
   async listarPedidosDoCliente(clienteID: string) {
     return await this.pedidoRepository.listarPedidosDoCliente(clienteID);
   }

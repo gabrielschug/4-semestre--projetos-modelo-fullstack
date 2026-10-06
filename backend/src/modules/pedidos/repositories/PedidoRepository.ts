@@ -12,6 +12,18 @@ export class PedidoRepository {
     return await this.prisma.pedido.findMany({ include: { itens: true } });
   }
 
+  async contarPedidosPorStatus() {
+    const contagens = await this.prisma.pedido.groupBy({
+      by: ["status"],
+      _count: { _all: true },
+    });
+
+    return contagens.map(({ status, _count }) => ({
+      status,
+      quantidade: _count._all,
+    }));
+  }
+
   async listarPedidosDoCliente(clienteID: string) {
     return await this.prisma.pedido.findMany({
       where: { clienteID },
