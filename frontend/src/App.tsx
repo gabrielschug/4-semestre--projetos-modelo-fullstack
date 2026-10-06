@@ -82,7 +82,7 @@ export default function App() {
 
   const listaProdutosNormais = produtos.map(
     (produto) =>
-      produto.valorDesconto === 0 && (
+      (produto.valorDesconto ?? 0) === 0 && (
         <CardProduto
           data={produto}
           key={produto.id}
@@ -94,7 +94,7 @@ export default function App() {
 
   const listaProdutosDestaques = produtos.map(
     (produto) =>
-      produto.valorDesconto > 0 && (
+      (produto.valorDesconto ?? 0) > 0 && (
         <CardProduto
           data={produto}
           key={produto.id}

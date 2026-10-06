@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import type { ProdutoType } from "../utils/ProdutoType";
 import { Search } from "lucide-react";
 
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = import.meta.env.VITE_API_URL.replace(/\/+$/, "");
 
 type Inputs = {
   termo: string;
@@ -17,22 +17,45 @@ export function InputPesquisa({ setProdutos }: InputPesquisaProps) {
   const { register, handleSubmit, reset } = useForm<Inputs>();
 
   async function enviaPesquisa(data: Inputs) {
-    if (data.termo.length < 2) {
+    const termo = data.termo.trim();
+    if (termo.length < 2) {
       toast.error("Informe, no mínimo, 2 caracteres");
       return;
     }
 
-    const response = await fetch(`${apiUrl}produtos/pesquisa/${data.termo}`);
-    const dados = await response.json();
-    // console.log(dados)
-    setProdutos(dados);
+    try {
+      const response = await fetch(
+        `${apiUrl}/produtos/pesquisa/${encodeURIComponent(termo)}`,
+      );
+      if (!response.ok) {
+        throw new Error(`Falha na pesquisa (HTTP ${response.status})`);
+      }
+
+      const dados: ProdutoType[] = await response.json();
+      setProdutos(dados);
+      if (dados.length === 0) {
+        toast.info("Nenhum produto encontrado.");
+      }
+    } catch (error) {
+      console.error("Erro ao pesquisar produtos:", error);
+      toast.error("Não foi possível realizar a busca. Tente novamente.");
+    }
   }
 
   async function mostraDestaques() {
-    const response = await fetch(`${apiUrl}produtos`);
-    const dados = await response.json();
-    reset({ termo: "" });
-    setProdutos(dados);
+    try {
+      const response = await fetch(`${apiUrl}/produtos`);
+      if (!response.ok) {
+        throw new Error(`Falha ao listar produtos (HTTP ${response.status})`);
+      }
+
+      const dados: ProdutoType[] = await response.json();
+      reset({ termo: "" });
+      setProdutos(dados);
+    } catch (error) {
+      console.error("Erro ao listar produtos:", error);
+      toast.error("Não foi possível carregar os produtos. Tente novamente.");
+    }
   }
 
   return (

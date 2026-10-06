@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import {
+  atualizarProdutoSchema,
+  criarProdutoSchema,
   produtoIdSchema,
   termoPesquisaSchema,
 } from "../schemas/ProdutoSchema";
@@ -16,6 +18,103 @@ export class ProdutoController {
       console.error(error);
       return res.status(500).json({
         error: "Erro ao obter produtos disponíveis",
+        detalhe: String(error),
+      });
+    }
+  }
+
+  async listarTodos(res: Response): Promise<Response> {
+    try {
+      const produtos = await this.service.listarTodos();
+      return res.status(200).json(produtos);
+    } catch (error) {
+      console.error("Erro ao listar todos os produtos:", error);
+      return res.status(500).json({
+        error: "Erro ao listar todos os produtos",
+        detalhe: String(error),
+      });
+    }
+  }
+
+  async criar(
+    req: Request & { adminId?: string },
+    res: Response,
+  ): Promise<Response> {
+    if (!req.adminId) {
+      return res.status(401).json({ error: "Administrador não autenticado" });
+    }
+
+    const dados = criarProdutoSchema.safeParse(req.body);
+    if (!dados.success) {
+      return res.status(400).json({
+        error: "Dados do produto inválidos",
+        detalhe: dados.error.flatten().fieldErrors,
+      });
+    }
+
+    try {
+      const produto = await this.service.criar(dados.data, req.adminId);
+      return res.status(201).json(produto);
+    } catch (error) {
+      console.error("Erro ao criar produto:", error);
+      return res.status(500).json({
+        error: "Erro ao criar produto",
+        detalhe: String(error),
+      });
+    }
+  }
+
+  async atualizar(req: Request, res: Response): Promise<Response> {
+    const id = produtoIdSchema.safeParse(req.params.id);
+    if (!id.success) {
+      return res.status(400).json({ error: "ID do produto inválido" });
+    }
+
+    const dados = atualizarProdutoSchema.safeParse(req.body);
+    if (!dados.success) {
+      return res.status(400).json({
+        error: "Dados do produto inválidos",
+        detalhe: dados.error.flatten().fieldErrors,
+      });
+    }
+
+    try {
+      const produto = await this.service.atualizar(id.data, dados.data);
+      if (!produto) {
+        return res.status(404).json({ error: "Produto não encontrado" });
+      }
+
+      return res.status(200).json(produto);
+    } catch (error) {
+      console.error("Erro ao atualizar produto:", error);
+      return res.status(500).json({
+        error: "Erro ao atualizar produto",
+        detalhe: String(error),
+      });
+    }
+  }
+
+  async excluir(req: Request, res: Response): Promise<Response> {
+    const id = produtoIdSchema.safeParse(req.params.id);
+    if (!id.success) {
+      return res.status(400).json({ error: "ID do produto inválido" });
+    }
+
+    try {
+      const resultado = await this.service.excluir(id.data);
+      if (resultado === "NAO_ENCONTRADO") {
+        return res.status(404).json({ error: "Produto não encontrado" });
+      }
+      if (resultado === "EM_USO") {
+        return res.status(409).json({
+          error: "Não é possível excluir um produto que já aparece em pedidos",
+        });
+      }
+      return res.status(204).send();
+    } catch (error) {
+      console.error("Erro ao excluir produto:", error);
+      return res.status(500).json({
+        error: "Erro ao excluir produto",
         detalhe: String(error),
       });
     }
