@@ -1,5 +1,7 @@
-import { z } from "zod"
+import { z } from "zod";
 
-import { adminLoginSchema } from "../schemas/AdminSchema"
+import { adminCadastroSchema, adminLoginSchema } from "../schemas/AdminSchema";
 
-export type LoginAdminInput = z.infer<typeof adminLoginSchema>
+export type LoginAdminInput = z.infer<typeof adminLoginSchema>;
+
+export type CadastrarAdminInput = z.infer<typeof adminCadastroSchema>;

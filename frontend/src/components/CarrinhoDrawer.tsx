@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { checkoutSchema, type CheckoutData } from "../schemas/CheckoutSchema";
 import { PedidoConfirmadoModal } from "./PedidoConfirmadoModal";
+import { calcularPrecoFinal } from "../utils/ProdutoType";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -71,7 +72,7 @@ export function CarrinhoDrawer() {
     (bairro) => bairro.id === bairroSelecionadoAtual,
   );
   const subtotal = itens.reduce(
-    (acc, item) => acc + item.produto.precoBase * item.quantidade,
+    (acc, item) => acc + calcularPrecoFinal(item.produto) * item.quantidade,
     0,
   );
   const taxaEntrega =
@@ -98,7 +99,7 @@ export function CarrinhoDrawer() {
           produtoID: item.produto.id,
           nomeProduto: item.produto.descricao,
           quantidade: item.quantidade,
-          precoProduto: item.produto.precoBase,
+          precoProduto: calcularPrecoFinal(item.produto),
           observacao: item.observacao,
         })),
       },
@@ -158,14 +159,16 @@ export function CarrinhoDrawer() {
             {item.produto.descricao} (x{item.quantidade})
           </span>
           <span className="text-secundaria">
-            {formatarMoeda(item.produto.precoBase * item.quantidade)}
+            {formatarMoeda(
+              calcularPrecoFinal(item.produto) * item.quantidade,
+            )}
           </span>
         </>
       ) : (
         <>
           <span className="text-secundaria">{item.produto.descricao}</span>
           <span className="text-secundaria">
-            {formatarMoeda(item.produto.precoBase)}
+            {formatarMoeda(calcularPrecoFinal(item.produto))}
           </span>
         </>
       )}

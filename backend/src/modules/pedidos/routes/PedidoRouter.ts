@@ -3,6 +3,7 @@ import { prisma } from "../../../lib/prisma";
 import { PedidoRepository } from "../repositories/PedidoRepository";
 import { PedidoService } from "../services/PedidoServices";
 import { PedidoController } from "../controllers/PedidoController";
+import { autenticarAdmin } from "../../../middlewares/autenticarAdmin";
 
 const pedidoRouter = Router();
 
@@ -10,7 +11,16 @@ const repository = new PedidoRepository(prisma);
 const service = new PedidoService(repository);
 const controller = new PedidoController(service);
 
-pedidoRouter.get("/", controller.listarPedidos.bind(controller));
+pedidoRouter.get(
+  "/status/quantidades",
+  autenticarAdmin,
+  controller.contarPedidosPorStatus.bind(controller),
+);
+pedidoRouter.get(
+  "/",
+  autenticarAdmin,
+  controller.listarPedidos.bind(controller),
+);
 pedidoRouter.get(
   "/cliente/:clienteId",
   controller.listarPedidosDoCliente.bind(controller),

@@ -23,6 +23,18 @@ export class PedidoController {
     }
   }
 
+  async contarPedidosPorStatus(_req: Request, res: Response): Promise<Response> {
+    try {
+      const result = await this.PedidoService.contarPedidosPorStatus();
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Erro ao contar pedidos por status:", error);
+      return res.status(500).json({
+        error: "Erro ao obter quantidades de pedidos por status",
+      });
+    }
+  }
+
   async listarPedidosDoCliente(req: Request, res: Response): Promise<Response> {
     try {
       const clienteID = clienteIdSchema.safeParse(req.params.clienteId);

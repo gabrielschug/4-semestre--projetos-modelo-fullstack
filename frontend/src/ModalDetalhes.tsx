@@ -1,5 +1,8 @@
 import { Modal, ModalBody, ModalHeader, ModalFooter } from "flowbite-react";
-import type { ProdutoType } from "./utils/ProdutoType";
+import {
+  calcularPrecoFinal,
+  type ProdutoType,
+} from "./utils/ProdutoType";
 import { useState, useEffect } from "react";
 import { useCarrinho } from "./context/useCarrinhoStore";
 import { toast } from "sonner";
@@ -30,6 +33,8 @@ export default function ModalDetalhes({
   }, [isOpen]);
 
   if (!produto) return null;
+
+  const precoFinal = calcularPrecoFinal(produto);
 
   const handleAdicionar = () => {
     const novoItem = {
@@ -64,7 +69,7 @@ export default function ModalDetalhes({
           {/* Imagem - Topo no mobile, esquerda no desktop */}
           <div className="w-full md:w-1/2 h-56 md:h-auto bg-white shrink-0">
             <img
-              src={produto.fotoUrl}
+              src={produto.fotoUrl ?? ""}
               alt={produto.descricao}
               className="w-full h-full object-cover"
             />
@@ -75,9 +80,16 @@ export default function ModalDetalhes({
               <p className="text-sm text-secundaria/65 mb-4 leading-relaxed">
                 {produto.especificacoes}
               </p>
-              <p className="text-lg font-medium text-secundaria mb-6">
-                {formatarMoeda(produto.precoBase)}
-              </p>
+              <div className="mb-6 flex items-baseline gap-3">
+                {(produto.valorDesconto ?? 0) > 0 && (
+                  <span className="text-sm text-secundaria/60 line-through">
+                    {formatarMoeda(produto.precoBase)}
+                  </span>
+                )}
+                <p className="text-lg font-medium text-secundaria">
+                  {formatarMoeda(precoFinal)}
+                </p>
+              </div>
 
               <AvaliacaoEstrelas media={avaliacaoMedia} />
 
@@ -125,7 +137,7 @@ export default function ModalDetalhes({
               >
                 <span className="text-sm font-medium">Adicionar</span>
                 <span className="text-sm font-medium">
-                  {formatarMoeda(produto.precoBase * count)}
+                  {formatarMoeda(precoFinal * count)}
                 </span>
               </button>
             </div>

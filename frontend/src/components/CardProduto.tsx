@@ -1,5 +1,5 @@
 import { Card } from "flowbite-react";
-import type { ProdutoType } from "../utils/ProdutoType";
+import { calcularPrecoFinal, type ProdutoType } from "../utils/ProdutoType";
 import { AvaliacaoEstrelas } from "./AvaliacaoEstrelas";
 
 interface CardProdutoProps {
@@ -14,7 +14,7 @@ export function CardProduto({
   avaliacaoMedia,
 }: CardProdutoProps) {
   // Calcula o preço final aplicando o desconto
-  const precoFinal = data.precoBase - data.valorDesconto;
+  const precoFinal = calcularPrecoFinal(data);
 
   // Formata os valores para a moeda local (Real)
   const formatarMoeda = (valor: number) =>
@@ -27,7 +27,7 @@ export function CardProduto({
     <Card
       className="max-w-sm [&_img]:aspect-square [&_img]:object-cover [&_img]:w-full"
       imgAlt={data.descricao}
-      imgSrc={data.fotoUrl}
+      imgSrc={data.fotoUrl ?? ""}
     >
       <a
         // href={`produtos/${data.id}`}
@@ -55,7 +55,7 @@ export function CardProduto({
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
           {/* Exibe o preço original riscado caso exista desconto */}
-          {data.valorDesconto > 0 && (
+          {(data.valorDesconto ?? 0) > 0 && (
             <span className="text-sm text-secundaria/60 line-through">
               {formatarMoeda(data.precoBase)}
             </span>
