@@ -18,7 +18,7 @@ app.use("/produtos", produtoRouter);
 app.use("/pedidos", pedidoRouter);
 app.use("/clientes", clienteRouter);
 app.use("/admins", adminRouter);
-app.use("/valores_entregas", adminRouter);
+app.use("/valores_entregas", bairrosRouter);
 app.use("/bairros", bairrosRouter);
 app.use("/itens-pedido", itensPedidoRouter);
 
