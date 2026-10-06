@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom"
 
 import { useAdminStore } from "../context/AdminContext"
 
-const apiUrl = import.meta.env.VITE_API_URL
+const apiUrl = import.meta.env.VITE_API_URL.replace(/\/+$/, "")
 
 type Props = {
     children: ReactNode
@@ -25,7 +25,7 @@ export default function AdminRotaProtegida({ children }: Props) {
             }
 
             try {
-                const response = await fetch(`${apiUrl}admins/me`, {
+                const response = await fetch(`${apiUrl}/admins/me`, {
                     headers: { Authorization: `Bearer ${tokenSalvo}` }
                 })
 

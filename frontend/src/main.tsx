@@ -11,8 +11,12 @@ import MeusPedidos from "./MeusPedidos.tsx";
 // ----------------- Rotas de Admin
 import AdminLayout from "./admin/AdminLayout.tsx";
 import AdminLogin from "./admin/AdminLogin.tsx";
-import AdminPainel from "./admin/AdminPainel.tsx";
-import AdminRotaProtegida from "./admin/AdminRotaProtegida.tsx";
+import AdminDashboard from "./admin/AdminDashboard.tsx";
+import AdminKanban from "./admin/AdminKanban.tsx";
+import AdminProdutos from "./admin/AdminProdutos.tsx";
+import AdminLocais from "./admin/AdminLocais.tsx";
+
+// import AdminRotaProtegida from "./admin/AdminRotaProtegida.tsx";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
@@ -28,18 +32,17 @@ const rotas = createBrowserRouter([
     ],
   },
   {
+    path: "/admin/login",
+    element: <AdminLogin />,
+  },
+  {
     path: "/admin",
     element: <AdminLayout />,
     children: [
-      { path: "login", element: <AdminLogin /> },
-      {
-        path: "painel",
-        element: (
-          <AdminRotaProtegida>
-            <AdminPainel />
-          </AdminRotaProtegida>
-        ),
-      },
+      { index: true, element: <AdminKanban /> },
+      { path: "dashboard", element: <AdminDashboard /> },
+      { path: "produtos", element: <AdminProdutos /> },
+      { path: "locais", element: <AdminLocais /> },
     ],
   },
 ]);

@@ -1,11 +1,19 @@
 import { useEffect, useState } from "react";
-import { Button, Table, TableBody, TableHead, TableHeadCell } from "flowbite-react";
+import {
+  Button,
+  Table,
+  TableBody,
+  TableHead,
+  TableHeadCell,
+} from "flowbite-react";
 import { Plus } from "lucide-react";
 import { useAdminStore } from "../context/AdminContext";
 import type { BairroType } from "../utils/BairroType";
-import AdminLocaisRow, { type BairroFormData } from "./components/AdminLocaisRow";
+import AdminLocaisRow, {
+  type BairroFormData,
+} from "./components/AdminLocaisRow";
 
-const apiUrl = import.meta.env.VITE_API_URL.replace(/\/+$/, "");
+const apiUrl = import.meta.env.VITE_API_URL;
 
 export default function AdminLocais() {
   const token = useAdminStore((state) => state.token);
@@ -74,7 +82,8 @@ export default function AdminLocais() {
     const resultado = await response.json();
     if (!response.ok) {
       throw new Error(
-        resultado.error ?? `Não foi possível salvar o local (HTTP ${response.status}).`,
+        resultado.error ??
+          `Não foi possível salvar o local (HTTP ${response.status}).`,
       );
     }
 
@@ -82,7 +91,9 @@ export default function AdminLocais() {
     if (id) {
       setBairros((atuais) =>
         atuais
-          .map((bairro) => (bairro.id === bairroSalvo.id ? bairroSalvo : bairro))
+          .map((bairro) =>
+            bairro.id === bairroSalvo.id ? bairroSalvo : bairro,
+          )
           .sort((a, b) => a.bairro.localeCompare(b.bairro, "pt-BR")),
       );
     } else {
@@ -109,7 +120,8 @@ export default function AdminLocais() {
     if (!response.ok) {
       const resultado = await response.json();
       throw new Error(
-        resultado.error ?? `Não foi possível excluir o local (HTTP ${response.status}).`,
+        resultado.error ??
+          `Não foi possível excluir o local (HTTP ${response.status}).`,
       );
     }
     setBairros((atuais) => atuais.filter((bairro) => bairro.id !== id));
@@ -126,7 +138,8 @@ export default function AdminLocais() {
         </h2>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <p className="text-gray-600">
-            {bairros.length} {bairros.length === 1 ? "local cadastrado" : "locais cadastrados"}
+            {bairros.length}{" "}
+            {bairros.length === 1 ? "local cadastrado" : "locais cadastrados"}
           </p>
           <Button
             color="primary"
@@ -145,7 +158,11 @@ export default function AdminLocais() {
           className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800"
         >
           <span>{erro}</span>
-          <Button size="xs" color="light" onClick={() => setTentativa((n) => n + 1)}>
+          <Button
+            size="xs"
+            color="light"
+            onClick={() => setTentativa((n) => n + 1)}
+          >
             Tentar novamente
           </Button>
         </div>

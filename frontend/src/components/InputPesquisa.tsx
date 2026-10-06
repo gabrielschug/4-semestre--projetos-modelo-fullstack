@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import type { ProdutoType } from "../utils/ProdutoType";
 import { Search } from "lucide-react";
 
-const apiUrl = import.meta.env.VITE_API_URL.replace(/\/+$/, "");
+const apiUrl = import.meta.env.VITE_API_URL;
 
 type Inputs = {
   termo: string;
