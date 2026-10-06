@@ -181,7 +181,7 @@ export function CarrinhoDrawer() {
         open={drawerAberto}
         onClose={fecharDrawer}
         position="right"
-        className="w-full bg-fundo p-0 text-secundaria md:w-[450px] flex flex-col"
+        className="w-full bg-fundo p-0 text-secundaria md:w-[450px] flex flex-col overflow-hidden"
       >
       <DrawerHeader
         title="MEU PEDIDO"
