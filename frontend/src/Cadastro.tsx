@@ -4,8 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
-import { clienteCadastroSchema } from "../../backend/src/modules/clientes/schemas/ClienteSchema";
-import type { CadastrarClienteInput } from "../../backend/src/modules/clientes/types/ClienteTypes";
+import {
+  clienteCadastroSchema,
+  type CadastrarClienteInput,
+} from "./schemas/ClienteCadastroSchema";
 import type { BairroType } from "./utils/BairroType";
 
 const formularioCadastroSchema = clienteCadastroSchema
