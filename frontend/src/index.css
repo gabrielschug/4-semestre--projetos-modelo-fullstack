@@ -3,6 +3,58 @@
 @source "../.flowbite-react/class-list.json";
 @custom-variant dark (&:where(.dark, .dark *));
 
+.admin-kanban-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
+  scrollbar-color: #c2410c #f3f4f6;
+  scrollbar-width: auto;
+}
+
+.admin-kanban-scroll::-webkit-scrollbar {
+  height: 12px;
+}
+
+.admin-kanban-scroll::-webkit-scrollbar-track {
+  border-radius: 9999px;
+  background: #f3f4f6;
+}
+
+.admin-kanban-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid #f3f4f6;
+  border-radius: 9999px;
+  background: #c2410c;
+}
+
+.admin-kanban-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9a3412;
+}
+
+.admin-kanban-column-scroll {
+  scrollbar-color: #c2410c #f3f4f6;
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+}
+
+.admin-kanban-column-scroll::-webkit-scrollbar {
+  width: 12px;
+}
+
+.admin-kanban-column-scroll::-webkit-scrollbar-track {
+  border-radius: 9999px;
+  background: #f3f4f6;
+}
+
+.admin-kanban-column-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid #f3f4f6;
+  border-radius: 9999px;
+  background: #c2410c;
+}
+
+.admin-kanban-column-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9a3412;
+}
+
 @theme {
   --color-primaria: #c2410c;
   --color-secundaria: #1e1e1e;

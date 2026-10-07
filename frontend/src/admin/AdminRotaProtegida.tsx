@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom"
 
 import { useAdminStore } from "../context/AdminContext"
 
-const apiUrl = import.meta.env.VITE_API_URL.replace(/\/+$/, "")
+const apiUrl = import.meta.env.VITE_API_URL
 
 type Props = {
     children: ReactNode

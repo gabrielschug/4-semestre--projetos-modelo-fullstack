@@ -21,6 +21,11 @@ pedidoRouter.get(
   autenticarAdmin,
   controller.listarPedidos.bind(controller),
 );
+pedidoRouter.patch(
+  "/:pedidoId/status",
+  autenticarAdmin,
+  controller.atualizarStatusPedido.bind(controller),
+);
 pedidoRouter.get(
   "/cliente/:clienteId",
   controller.listarPedidosDoCliente.bind(controller),

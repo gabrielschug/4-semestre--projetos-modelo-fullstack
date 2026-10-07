@@ -9,7 +9,7 @@ type Inputs = {
   senha: string;
 };
 
-const apiUrl = import.meta.env.VITE_API_URL.replace(/\/+$/, "");
+const apiUrl = import.meta.env.VITE_API_URL
 
 export default function AdminLogin() {
   const {
