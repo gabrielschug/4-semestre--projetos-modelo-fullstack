@@ -1,4 +1,4 @@
-import { Modal, ModalBody, ModalHeader, ModalFooter } from "flowbite-react";
+import { Modal, ModalBody, ModalHeader } from "flowbite-react";
 import {
   calcularPrecoFinal,
   type ProdutoType,
@@ -7,6 +7,14 @@ import { useState, useEffect } from "react";
 import { useCarrinho } from "./context/useCarrinhoStore";
 import { toast } from "sonner";
 import { AvaliacaoEstrelas } from "./components/AvaliacaoEstrelas";
+
+function gerarIdItemCarrinho() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (caractere) => {
+    const valor = Math.floor(Math.random() * 16);
+    const digito = caractere === "x" ? valor : (valor & 0x3) | 0x8;
+    return digito.toString(16);
+  });
+}
 
 interface ModalDetalhesProps {
   produto: ProdutoType | null;
@@ -38,7 +46,7 @@ export default function ModalDetalhes({
 
   const handleAdicionar = () => {
     const novoItem = {
-      id_item_carrinho: crypto.randomUUID(),
+      id_item_carrinho: gerarIdItemCarrinho(),
       produto: produto,
       quantidade: count,
       observacao: observacao,
@@ -61,58 +69,59 @@ export default function ModalDetalhes({
 
   return (
     <Modal dismissible show={isOpen} onClose={onClose} size="3xl">
-      <ModalHeader className="border-none text-secundaria">
+      <ModalHeader className="border-none px-4 py-3 text-base text-secundaria sm:px-6 sm:py-4 sm:text-xl">
         {produto.descricao}
       </ModalHeader>
-      <ModalBody className="p-0 overflow-hidden">
-        <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
-          {/* Imagem - Topo no mobile, esquerda no desktop */}
-          <div className="w-full md:w-1/2 h-56 md:h-auto bg-white shrink-0">
+      <ModalBody className="h-[calc(100dvh-8rem)] max-h-[calc(100dvh-8rem)] overflow-hidden p-0 sm:h-auto sm:max-h-[80vh]">
+        <div className="flex h-full max-h-full flex-col md:h-[min(70vh,38rem)] md:flex-row">
+          <div className="h-[clamp(6rem,22dvh,9rem)] w-full shrink-0 bg-white sm:h-48 md:h-full md:w-1/2">
             <img
               src={produto.fotoUrl ?? ""}
               alt={produto.descricao}
-              className="w-full h-full object-cover"
+              className="h-full w-full object-cover"
             />
           </div>
 
-          <div className="w-full md:w-1/2 flex flex-col bg-white">
-            <div className="p-4 md:p-6 overflow-y-auto flex-1">
-              <p className="text-sm text-secundaria/65 mb-4 leading-relaxed">
+          <div className="flex min-h-0 w-full flex-1 flex-col bg-white md:w-1/2">
+            <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-6">
+              <p className="mb-3 text-xs leading-relaxed text-secundaria/65 sm:mb-4 sm:text-sm">
                 {produto.especificacoes}
               </p>
-              <div className="mb-6 flex items-baseline gap-3">
+              <div className="mb-4 flex flex-wrap items-baseline gap-2 sm:mb-6 sm:gap-3">
                 {(produto.valorDesconto ?? 0) > 0 && (
-                  <span className="text-sm text-secundaria/60 line-through">
+                  <span className="text-xs text-secundaria/60 line-through sm:text-sm">
                     {formatarMoeda(produto.precoBase)}
                   </span>
                 )}
-                <p className="text-lg font-medium text-secundaria">
+                <p className="text-lg font-bold text-secundaria sm:text-xl">
                   {formatarMoeda(precoFinal)}
                 </p>
               </div>
 
-              <AvaliacaoEstrelas media={avaliacaoMedia} />
+              <AvaliacaoEstrelas media={avaliacaoMedia} compact />
 
-              <div className="mt-4">
-                <div className="flex justify-between items-center mb-2">
-                  <label className="text-base font-medium text-secundaria">
+              <div className="mt-3 sm:mt-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <label className="text-sm font-medium text-secundaria sm:text-base">
                     Algum comentário?
                   </label>
                 </div>
                 <textarea
                   value={observacao}
                   onChange={(event) => setObservacao(event.target.value)}
-                  className="w-full resize-none rounded-md border border-secundaria/20 bg-white p-3 text-sm text-secundaria shadow-sm transition-colors placeholder:text-secundaria/50 focus:border-primaria focus:bg-fundo focus:ring-primaria"
+                  className="w-full resize-none rounded-md border border-secundaria/20 bg-white p-2.5 text-sm text-secundaria shadow-sm transition-colors placeholder:text-secundaria/50 focus:border-primaria focus:bg-fundo focus:ring-primaria sm:p-3"
                   rows={2}
                   placeholder="Ex: tirar a cebola, maionese à parte etc."
                 ></textarea>
               </div>
             </div>
 
-            <div className="p-4 border-t border-secundaria/10 bg-white flex items-center justify-between gap-4 mt-auto">
-              <div className="flex items-center justify-between border border-secundaria/20 rounded-md h-12 w-28 px-2 bg-fundo">
+            <div className="mt-auto flex shrink-0 items-center justify-between gap-2 border-t border-secundaria/10 bg-white p-3 sm:gap-4 sm:p-4">
+              <div className="flex h-11 w-24 shrink-0 items-center justify-between rounded-md border border-secundaria/20 bg-fundo px-1 sm:h-12 sm:w-28 sm:px-2">
                 <button
-                  className="text-secundaria text-2xl w-8 h-8 flex items-center justify-center hover:bg-primaria/10 rounded pb-1 transition-colors"
+                  type="button"
+                  aria-label="Diminuir quantidade"
+                  className="flex h-10 w-10 items-center justify-center rounded pb-1 text-2xl text-secundaria transition-colors hover:bg-primaria/10"
                   onClick={() => setCount(count > 1 ? count - 1 : 1)}
                 >
                   -
@@ -121,7 +130,9 @@ export default function ModalDetalhes({
                   {count}
                 </span>
                 <button
-                  className="text-secundaria text-2xl w-8 h-8 flex items-center justify-center hover:bg-primaria/10 rounded pb-1 transition-colors"
+                  type="button"
+                  aria-label="Aumentar quantidade"
+                  className="flex h-10 w-10 items-center justify-center rounded pb-1 text-2xl text-secundaria transition-colors hover:bg-primaria/10"
                   onClick={() => setCount(count + 1)}
                 >
                   +
@@ -129,7 +140,8 @@ export default function ModalDetalhes({
               </div>
 
               <button
-                className="flex-1 h-12 bg-primaria hover:bg-secundaria text-white rounded-md px-4 flex items-center justify-between transition-colors mx-auto focus:outline-none focus:ring-4 focus:ring-primaria/30"
+                type="button"
+                className="mx-auto flex h-11 min-w-0 flex-1 items-center justify-between gap-2 rounded-md bg-primaria px-3 text-white transition-colors hover:bg-secundaria focus:outline-none focus:ring-4 focus:ring-primaria/30 sm:h-12 sm:px-4"
                 onClick={() => {
                   handleAdicionar();
                   produtoAdicionado();
@@ -144,7 +156,6 @@ export default function ModalDetalhes({
           </div>
         </div>
       </ModalBody>
-      <ModalFooter className="p-1 border-none"></ModalFooter>
     </Modal>
   );
 }
