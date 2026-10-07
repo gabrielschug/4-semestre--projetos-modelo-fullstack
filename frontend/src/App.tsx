@@ -115,7 +115,7 @@ export default function App() {
                 Ofertas especiais
               </h2>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3">
               {listaProdutosDestaques}
             </div>
           </section>
@@ -126,7 +126,7 @@ export default function App() {
                 Cardápio
               </h2>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3">
               {listaProdutosNormais}
             </div>
           </section>

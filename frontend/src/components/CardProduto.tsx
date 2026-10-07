@@ -25,7 +25,7 @@ export function CardProduto({
 
   return (
     <Card
-      className="max-w-sm [&_img]:aspect-square [&_img]:object-cover [&_img]:w-full"
+      className="h-full w-full max-w-sm overflow-hidden [&>div:last-child]:gap-3 [&>div:last-child]:p-3 [&_img]:h-32 [&_img]:w-full [&_img]:object-cover sm:[&>div:last-child]:gap-4 sm:[&>div:last-child]:p-6 sm:[&_img]:h-48"
       imgAlt={data.descricao}
       imgSrc={data.fotoUrl ?? ""}
     >
@@ -36,31 +36,31 @@ export function CardProduto({
           aoClicar(data);
         }}
       >
-        <h5 className="text-xl font-semibold tracking-tight text-secundaria">
+        <h5 className="line-clamp-2 min-h-10 text-sm font-semibold leading-5 tracking-tight text-secundaria sm:min-h-0 sm:text-xl sm:leading-normal">
           {data.descricao}
         </h5>
       </a>
 
-      <div className="mb-5 mt-2.5 flex items-center justify-between">
-        <span className="rounded bg-primaria/10 px-2.5 py-0.5 text-xs font-semibold text-primaria">
+      <div className="flex flex-wrap items-center justify-between gap-1">
+        <span className="max-w-full truncate rounded bg-primaria/10 px-2 py-0.5 text-[10px] font-semibold text-primaria sm:px-2.5 sm:text-xs">
           {data.categoria}
         </span>
-        <span className="text-sm font-medium text-secundaria/65">
+        <span className="whitespace-nowrap text-[10px] font-medium text-secundaria/65 sm:text-sm">
           ⏳ {data.tempoPreparoMinutos} min
         </span>
       </div>
 
-      <AvaliacaoEstrelas media={avaliacaoMedia} />
+      <AvaliacaoEstrelas media={avaliacaoMedia} compact />
 
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 flex-col">
           {/* Exibe o preço original riscado caso exista desconto */}
           {(data.valorDesconto ?? 0) > 0 && (
-            <span className="text-sm text-secundaria/60 line-through">
+            <span className="text-xs text-secundaria/60 line-through sm:text-sm">
               {formatarMoeda(data.precoBase)}
             </span>
           )}
-          <span className="text-3xl font-bold text-secundaria">
+          <span className="text-lg font-bold leading-tight text-secundaria sm:text-3xl">
             {formatarMoeda(precoFinal)}
           </span>
         </div>
@@ -68,7 +68,7 @@ export function CardProduto({
         <button
           disabled={!data.disponibilidade}
           onClick={() => aoClicar(data)}
-          className={`rounded-lg px-5 py-2.5 text-center text-sm font-medium text-white focus:outline-none focus:ring-4 ${
+          className={`w-full whitespace-nowrap rounded-lg px-3 py-2 text-center text-xs font-medium text-white focus:outline-none focus:ring-4 sm:w-auto sm:px-5 sm:py-2.5 sm:text-sm ${
             data.disponibilidade
               ? "bg-primaria hover:bg-secundaria"
               : "cursor-not-allowed bg-secundaria/40"
