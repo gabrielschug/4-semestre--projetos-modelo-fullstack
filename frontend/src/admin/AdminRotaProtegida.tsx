@@ -25,7 +25,7 @@ export default function AdminRotaProtegida({ children }: Props) {
             }
 
             try {
-                const response = await fetch(`${apiUrl}admins/me`, {
+                const response = await fetch(`${apiUrl}/admins/me`, {
                     headers: { Authorization: `Bearer ${tokenSalvo}` }
                 })
 

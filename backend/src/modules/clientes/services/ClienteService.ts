@@ -8,7 +8,7 @@ const quantidadeDeRodadasDeCriptografia = 10
 export class ClienteService {
   constructor(private readonly clienteRepository: ClienteRepository) {}
 
-  private removeSenha<T extends { senha: string }>(cliente: T) {
+  private removeSenha<T extends { senha: string | null }>(cliente: T) {
     const { senha, ...clienteSemSenha } = cliente
     return clienteSemSenha
   }
@@ -28,6 +28,10 @@ export class ClienteService {
   async login(dados: LoginClienteInput) {
     const cliente = await this.clienteRepository.buscarPorTelefone(dados.telefone)
     if (!cliente) {
+      throw new Error("CREDENCIAIS_INVALIDAS")
+    }
+
+    if (!cliente.senha) {
       throw new Error("CREDENCIAIS_INVALIDAS")
     }
 

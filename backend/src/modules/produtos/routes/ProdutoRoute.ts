@@ -3,6 +3,7 @@ import { ProdutoController } from "../controllers/ProdutoController";
 import { ProdutoService } from "../services/ProdutoService";
 import { ProdutoRepository } from "../repositories/ProdutoRepository";
 import { prisma } from "../../../lib/prisma";
+import { autenticarAdmin } from "../../../middlewares/autenticarAdmin";
 
 const produtoRouter = Router();
 
@@ -11,6 +12,25 @@ const service = new ProdutoService(repository);
 const controller = new ProdutoController(service);
 
 produtoRouter.get("/", (req, res) => controller.listarProdutosDisponiveis(res));
+produtoRouter.get("/todos", autenticarAdmin, (_req, res) =>
+  controller.listarTodos(res),
+);
+produtoRouter.get("/destaques", (_req, res) => controller.listarDestaques(res));
+produtoRouter.get("/categoria/:categoria", (req, res) =>
+  controller.pesquisarPorCategoria(req, res),
+);
+produtoRouter.post("/", autenticarAdmin, (req, res) =>
+  controller.criar(req, res),
+);
+produtoRouter.post("/gerar-frase", autenticarAdmin, (req, res) =>
+  controller.gerarFraseVenda(req, res),
+);
+produtoRouter.put("/:id", autenticarAdmin, (req, res) =>
+  controller.atualizar(req, res),
+);
+produtoRouter.delete("/:id", autenticarAdmin, (req, res) =>
+  controller.excluir(req, res),
+);
 produtoRouter.get("/:id", (req, res) =>
   controller.PesquisarProdutoPorId(req, res),
 );

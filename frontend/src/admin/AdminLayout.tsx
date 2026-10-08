@@ -1,40 +1,70 @@
-import { Outlet, useNavigate } from "react-router-dom"
-import { Toaster } from "sonner"
-
-import { useAdminStore } from "../context/AdminContext"
+import { useState } from "react";
+import { Outlet, useLocation } from "react-router-dom";
+import AdminTitulo from "./components/AdminTitulo";
+import AdminSidebar from "./components/AdminSidebar";
+import { Toaster } from "sonner";
+import AdminRotaProtegida from "./AdminRotaProtegida";
+import { Menu } from "lucide-react";
 
 export default function AdminLayout() {
-    const { admin, deslogaAdmin } = useAdminStore()
-    const navigate = useNavigate()
+  const [sidebarMinimizado, setSidebarMinimizado] = useState(false);
+  const [menuMobileAberto, setMenuMobileAberto] = useState(false);
+  const isKanban = useLocation().pathname === "/admin";
 
-    function adminSair() {
-        if (confirm("Confirma saída da área administrativa?")) {
-            deslogaAdmin()
-            localStorage.removeItem("adminToken")
-            navigate("/admin/login")
-        }
-    }
-
-    return (
-        <div className="min-h-screen bg-gray-950">
-            <nav className="border-b border-gray-800 bg-gray-900">
-                <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-                    <span className="text-white font-semibold tracking-wide">
-                        Painel Administrativo
-                    </span>
-                    {admin.id && (
-                        <div className="flex items-center gap-4">
-                            <span className="text-gray-300 text-sm">{admin.nome}</span>
-                            <button onClick={adminSair}
-                                className="text-sm font-medium text-orange-400 hover:text-orange-300 cursor-pointer">
-                                Sair
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </nav>
-            <Outlet />
-            <Toaster richColors position="top-center" />
+  return (
+    <AdminRotaProtegida>
+      <>
+        <AdminTitulo />
+        <div
+          className={`relative flex min-h-0 ${
+            isKanban
+              ? "h-[calc(100dvh-4rem)] overflow-hidden"
+              : "min-h-[calc(100vh-4rem)]"
+          }`}
+        >
+          {menuMobileAberto && (
+            <button
+              type="button"
+              aria-label="Fechar menu de navegação"
+              onClick={() => setMenuMobileAberto(false)}
+              className="fixed inset-x-0 bottom-0 top-16 z-30 bg-gray-950/40 md:hidden"
+            />
+          )}
+          <AdminSidebar
+            collapsed={sidebarMinimizado}
+            mobileOpen={menuMobileAberto}
+            onToggleCollapsed={() =>
+              setSidebarMinimizado((minimizado) => !minimizado)
+            }
+            onCloseMobile={() => setMenuMobileAberto(false)}
+          />
+          <main
+            className={`min-w-0 flex-1 p-3 sm:p-4 lg:p-6 ${
+              isKanban
+                ? "flex min-h-0 flex-col overflow-hidden"
+                : "overflow-x-hidden"
+            }`}
+          >
+            <button
+              type="button"
+              onClick={() => setMenuMobileAberto(true)}
+              aria-label="Abrir menu de navegação"
+              className="mb-4 inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 md:hidden"
+            >
+              <Menu aria-hidden="true" className="h-4 w-4" />
+              Menu
+            </button>
+            <div
+              className={
+                isKanban ? "flex min-h-0 flex-1 flex-col" : undefined
+              }
+            >
+              <Outlet />
+            </div>
+          </main>
         </div>
-    )
+        <Toaster richColors position="top-right" />
+      </>
+    </AdminRotaProtegida>
+  );
 }
