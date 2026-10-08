@@ -3,7 +3,7 @@ import { z } from "zod";
 import { PedidoService } from "../services/PedidoServices";
 import { CriarPedidoDTO } from "../types/PedidosType";
 
-const clienteIdSchema = z.string().uuid();
+const clienteIdSchema = z.string().guid();
 const avaliacaoSchema = z.object({
   avaliacao: z.number().int().min(1).max(5),
 });
@@ -40,6 +40,18 @@ export class PedidoController {
       return res.status(500).json({
         error: "Erro ao obter quantidades de pedidos por status",
       });
+    }
+  }
+
+  async dadosDashboard(_req: Request, res: Response): Promise<Response> {
+    try {
+      const result = await this.PedidoService.dadosDashboard();
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("Erro ao obter dados do dashboard:", error);
+      return res
+        .status(500)
+        .json({ error: "Erro ao obter dados do dashboard" });
     }
   }
 
@@ -104,7 +116,7 @@ export class PedidoController {
 
   async cancelarPedido(req: Request, res: Response): Promise<Response> {
     const clienteID = clienteIdSchema.safeParse(req.params.clienteId);
-    const pedidoID = z.string().uuid().safeParse(req.params.pedidoId);
+    const pedidoID = z.string().guid().safeParse(req.params.pedidoId);
     if (!clienteID.success || !pedidoID.success) {
       return res.status(400).json({ error: "Identificação inválida" });
     }
@@ -133,8 +145,8 @@ export class PedidoController {
 
   async avaliarItemPedido(req: Request, res: Response): Promise<Response> {
     const clienteID = clienteIdSchema.safeParse(req.params.clienteId);
-    const pedidoID = z.string().uuid().safeParse(req.params.pedidoId);
-    const itemID = z.string().uuid().safeParse(req.params.itemId);
+    const pedidoID = z.string().guid().safeParse(req.params.pedidoId);
+    const itemID = z.string().guid().safeParse(req.params.itemId);
     const body = avaliacaoSchema.safeParse(req.body);
     if (!clienteID.success || !pedidoID.success || !itemID.success) {
       return res.status(400).json({ error: "Identificação inválida" });

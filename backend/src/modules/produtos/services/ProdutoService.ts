@@ -15,6 +15,14 @@ export class ProdutoService {
     return await this.produtoRepository.listarTodos();
   }
 
+  async listarDestaques() {
+    return await this.produtoRepository.listarDestaques();
+  }
+
+  async pesquisarPorCategoria(categoria: string) {
+    return await this.produtoRepository.pesquisarPorCategoria(categoria);
+  }
+
   async atualizar(id: string, dados: AtualizarProdutoInput) {
     return await this.produtoRepository.atualizar(id, dados);
   }

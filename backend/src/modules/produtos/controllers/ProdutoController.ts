@@ -36,6 +36,37 @@ export class ProdutoController {
     }
   }
 
+  async listarDestaques(res: Response): Promise<Response> {
+    try {
+      const produtos = await this.service.listarDestaques();
+      return res.status(200).json(produtos);
+    } catch (error) {
+      console.error("Erro ao listar produtos em destaque:", error);
+      return res.status(500).json({
+        error: "Erro ao listar produtos em destaque",
+        detalhe: String(error),
+      });
+    }
+  }
+
+  async pesquisarPorCategoria(req: Request, res: Response): Promise<Response> {
+    const categoria = termoPesquisaSchema.safeParse(req.params.categoria);
+    if (!categoria.success) {
+      return res.status(400).json({ error: "Categoria inválida" });
+    }
+
+    try {
+      const produtos = await this.service.pesquisarPorCategoria(categoria.data);
+      return res.status(200).json(produtos);
+    } catch (error) {
+      console.error("Erro ao pesquisar produtos por categoria:", error);
+      return res.status(500).json({
+        error: "Erro ao pesquisar produtos por categoria",
+        detalhe: String(error),
+      });
+    }
+  }
+
   async criar(
     req: Request & { adminId?: string },
     res: Response,
@@ -128,6 +159,9 @@ export class ProdutoController {
 
     try {
       const result = await this.service.PesquisarProdutoPorId(id.data);
+      if (!result) {
+        return res.status(404).json({ error: "Produto não encontrado" });
+      }
       return res.status(200).json(result);
     } catch (error) {
       console.error(error);

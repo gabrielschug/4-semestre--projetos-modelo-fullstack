@@ -132,7 +132,9 @@ export default function AdminPedidoCard({
           </p>
         )}
         <a
-          href={`tel:${pedido.cliente.telefone}`}
+          href={`https://wa.me/55${pedido.cliente.telefone.replace(/\D/g, "")}`}
+          target="_blank"
+          rel="noopener noreferrer"
           className="inline-flex items-center gap-2 text-orange-800 hover:underline"
         >
           <Phone aria-hidden="true" className="h-3 w-3" />

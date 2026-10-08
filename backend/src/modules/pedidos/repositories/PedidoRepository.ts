@@ -71,6 +71,32 @@ export class PedidoRepository {
     }));
   }
 
+  async somarItensVendidos() {
+    const itens = await this.prisma.itensPedido.groupBy({
+      by: ["produtoID"],
+      where: { pedido: { status: { not: "CANCELADO" } } },
+      _sum: { quantidade: true },
+    });
+    const produtos = await this.prisma.produto.findMany({
+      where: { id: { in: itens.map((item) => item.produtoID) } },
+      select: { id: true, descricao: true, categoria: true },
+    });
+
+    return produtos.map((produto) => ({
+      ...produto,
+      quantidade:
+        itens.find((item) => item.produtoID === produto.id)?._sum.quantidade ??
+        0,
+    }));
+  }
+
+  async listarDatasPedidosDesde(inicio: Date) {
+    return await this.prisma.pedido.findMany({
+      where: { dataHora: { gte: inicio }, status: { not: "CANCELADO" } },
+      select: { dataHora: true },
+    });
+  }
+
   async listarPedidosDoCliente(clienteID: string) {
     return await this.prisma.pedido.findMany({
       where: { clienteID },
