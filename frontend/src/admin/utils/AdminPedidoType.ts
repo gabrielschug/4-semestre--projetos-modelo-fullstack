@@ -12,6 +12,7 @@ export type PedidoAdmin = {
   dataHora: string;
   tempoTotalEstimadoMinutos: number;
   modalEntrega: "DELIVERY" | "RETIRADA";
+  pagamento: "DINHEIRO" | "MAQUININHA_CARTAO";
   valorTotal: number;
   anotacaoCliente: string | null;
   cliente: {

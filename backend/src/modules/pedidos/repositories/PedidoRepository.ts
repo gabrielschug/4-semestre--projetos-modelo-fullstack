@@ -17,6 +17,7 @@ export class PedidoRepository {
         dataHora: true,
         tempoTotalEstimadoMinutos: true,
         modalEntrega: true,
+        pagamento: true,
         valorTotal: true,
         anotacaoCliente: true,
         cliente: {
