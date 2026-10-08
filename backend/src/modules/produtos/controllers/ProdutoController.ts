@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import {
   atualizarProdutoSchema,
   criarProdutoSchema,
+  gerarFraseVendaSchema,
   produtoIdSchema,
   termoPesquisaSchema,
 } from "../schemas/ProdutoSchema";
@@ -90,6 +91,32 @@ export class ProdutoController {
       console.error("Erro ao criar produto:", error);
       return res.status(500).json({
         error: "Erro ao criar produto",
+        detalhe: String(error),
+      });
+    }
+  }
+
+  async gerarFraseVenda(req: Request, res: Response): Promise<Response> {
+    const dados = gerarFraseVendaSchema.safeParse(req.body);
+    if (!dados.success) {
+      return res.status(400).json({
+        error: "Dados do produto inválidos",
+        detalhe: dados.error.flatten().fieldErrors,
+      });
+    }
+
+    try {
+      const fraseVenda = await this.service.gerarFraseVenda(dados.data);
+      return res.status(200).json({ fraseVenda });
+    } catch (error) {
+      if (error instanceof Error && error.message === "GEMINI_NAO_CONFIGURADO") {
+        return res.status(503).json({
+          error: "Integração com IA não configurada (GEMINI_API_KEY ausente)",
+        });
+      }
+      console.error("Erro ao gerar frase de venda com IA:", error);
+      return res.status(502).json({
+        error: "Não foi possível gerar a frase com IA. Tente novamente.",
         detalhe: String(error),
       });
     }

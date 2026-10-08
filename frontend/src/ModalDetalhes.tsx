@@ -84,6 +84,11 @@ export default function ModalDetalhes({
 
           <div className="flex min-h-0 w-full flex-1 flex-col bg-white md:w-1/2">
             <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-6">
+              {produto.fraseVenda && (
+                <p className="mb-2 border-l-4 border-primaria pl-3 text-sm font-semibold italic leading-snug text-primaria sm:mb-3 sm:text-base">
+                  {produto.fraseVenda}
+                </p>
+              )}
               <p className="mb-3 text-xs leading-relaxed text-secundaria/65 sm:mb-4 sm:text-sm">
                 {produto.especificacoes}
               </p>

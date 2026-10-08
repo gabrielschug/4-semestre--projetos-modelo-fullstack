@@ -108,6 +108,34 @@ export default function AdminProdutos() {
     return produtoAtualizado;
   }
 
+  async function gerarFraseVenda(
+    dados: Pick<ProdutoEdicaoType, "descricao" | "categoria" | "especificacoes">,
+  ): Promise<string> {
+    const tokenAdmin = token || localStorage.getItem("adminToken");
+    if (!tokenAdmin) {
+      throw new Error("Sessão administrativa não encontrada. Entre novamente.");
+    }
+
+    const response = await fetch(`${apiUrl}/produtos/gerar-frase`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${tokenAdmin}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dados),
+    });
+    const resultado = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        resultado.error ??
+          `Não foi possível gerar a frase (HTTP ${response.status}).`,
+      );
+    }
+
+    return resultado.fraseVenda as string;
+  }
+
   async function excluirProduto(id: string): Promise<void> {
     const tokenAdmin = token || localStorage.getItem("adminToken");
     if (!tokenAdmin) {
@@ -169,6 +197,7 @@ export default function AdminProdutos() {
             <TableHeadCell>Desconto</TableHeadCell>
             <TableHeadCell>Disponibilidade</TableHeadCell>
             <TableHeadCell>Especificações</TableHeadCell>
+            <TableHeadCell>Frase de venda (IA)</TableHeadCell>
             <TableHeadCell>URL da foto</TableHeadCell>
             <TableHeadCell>Preparo (min)</TableHeadCell>
             <TableHeadCell>Ações</TableHeadCell>
@@ -185,24 +214,26 @@ export default function AdminProdutos() {
                   valorDesconto: 0,
                   disponibilidade: true,
                   especificacoes: null,
+                  fraseVenda: null,
                   fotoUrl: null,
                   tempoPreparoMinutos: null,
                   adminID: "",
                 }}
                 isNew
                 onSave={salvarProduto}
+                onGerarFrase={gerarFraseVenda}
                 onCancel={() => setCriandoProduto(false)}
               />
             )}
             {carregando ? (
               <tr>
-                <td colSpan={10} className="p-6 text-center text-gray-600">
+                <td colSpan={11} className="p-6 text-center text-gray-600">
                   Carregando produtos...
                 </td>
               </tr>
             ) : erro ? (
               <tr>
-                <td colSpan={10} className="p-6 text-center">
+                <td colSpan={11} className="p-6 text-center">
                   <p className="text-red-700">{erro}</p>
                   <button
                     type="button"
@@ -215,7 +246,7 @@ export default function AdminProdutos() {
               </tr>
             ) : produtos.length === 0 ? (
               <tr>
-                <td colSpan={10} className="p-6 text-center text-gray-600">
+                <td colSpan={11} className="p-6 text-center text-gray-600">
                   Nenhum produto cadastrado.
                 </td>
               </tr>
@@ -226,6 +257,7 @@ export default function AdminProdutos() {
                   produto={produto}
                   onSave={salvarProduto}
                   onDelete={excluirProduto}
+                  onGerarFrase={gerarFraseVenda}
                 />
               ))
             )}
