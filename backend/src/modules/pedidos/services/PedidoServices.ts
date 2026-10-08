@@ -31,11 +31,56 @@ function transicaoPermitida(
   }
 }
 
+function formatarDia(data: Date): string {
+  return data.toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
+}
+
 export class PedidoService {
   constructor(private readonly pedidoRepository: PedidoRepository) {}
 
   async listarPedidos() {
     return await this.pedidoRepository.listarPedidos();
+  }
+
+  async dadosDashboard() {
+    const umDia = 86_400_000;
+    const agora = Date.now();
+    const dias = Array.from({ length: 30 }, (_, i) =>
+      formatarDia(new Date(agora - (29 - i) * umDia)),
+    );
+
+    const [produtos, pedidos] = await Promise.all([
+      this.pedidoRepository.somarItensVendidos(),
+      this.pedidoRepository.listarDatasPedidosDesde(
+        new Date(agora - 31 * umDia),
+      ),
+    ]);
+
+    const maisPedidos = (prefixoCategoria: string) =>
+      produtos
+        .filter((produto) =>
+          produto.categoria.toLowerCase().startsWith(prefixoCategoria),
+        )
+        .sort((a, b) => b.quantidade - a.quantidade)
+        .slice(0, 5)
+        .map(({ descricao, quantidade }) => ({ descricao, quantidade }));
+
+    const contagem = new Map(dias.map((dia) => [dia, 0]));
+    for (const { dataHora } of pedidos) {
+      const dia = formatarDia(dataHora);
+      if (contagem.has(dia)) {
+        contagem.set(dia, contagem.get(dia)! + 1);
+      }
+    }
+
+    return {
+      refeicoes: maisPedidos("refei"),
+      bebidas: maisPedidos("bebida"),
+      pedidosPorDia: dias.map((dia) => ({
+        dia,
+        quantidade: contagem.get(dia)!,
+      })),
+    };
   }
 
   async contarPedidosPorStatus() {

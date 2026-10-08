@@ -24,6 +24,23 @@ export class ProdutoRepository {
     });
   }
 
+  async listarDestaques() {
+    return await this.prisma.produto.findMany({
+      where: { disponibilidade: true, valorDesconto: { gt: 0 } },
+      orderBy: { valorDesconto: "desc" },
+    });
+  }
+
+  async pesquisarPorCategoria(categoria: string) {
+    return await this.prisma.produto.findMany({
+      where: {
+        categoria: { equals: categoria, mode: "insensitive" },
+        disponibilidade: true,
+      },
+      orderBy: { descricao: "asc" },
+    });
+  }
+
   async atualizar(id: string, dados: AtualizarProdutoInput) {
     const produto = await this.prisma.produto.findUnique({ where: { id } });
     if (!produto) {

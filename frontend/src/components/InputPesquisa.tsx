@@ -14,7 +14,7 @@ type InputPesquisaProps = {
 };
 
 export function InputPesquisa({ setProdutos }: InputPesquisaProps) {
-  const { register, handleSubmit, reset } = useForm<Inputs>();
+  const { register, handleSubmit } = useForm<Inputs>();
 
   async function enviaPesquisa(data: Inputs) {
     const termo = data.termo.trim();
@@ -42,7 +42,7 @@ export function InputPesquisa({ setProdutos }: InputPesquisaProps) {
     }
   }
 
-  async function mostraDestaques() {
+  async function mostraTodos() {
     try {
       const response = await fetch(`${apiUrl}/produtos`);
       if (!response.ok) {
@@ -50,7 +50,6 @@ export function InputPesquisa({ setProdutos }: InputPesquisaProps) {
       }
 
       const dados: ProdutoType[] = await response.json();
-      reset({ termo: "" });
       setProdutos(dados);
     } catch (error) {
       console.error("Erro ao listar produtos:", error);
@@ -69,7 +68,14 @@ export function InputPesquisa({ setProdutos }: InputPesquisaProps) {
             className="block w-full rounded-lg border border-secundaria/20 bg-white p-4 ps-10 text-sm text-secundaria placeholder:text-secundaria/50 focus:border-primaria focus:ring-primaria"
             placeholder="Busque o item"
             required
-            {...register("termo")}
+            {...register("termo", {
+              // Ao limpar o campo, volta a listar todos os produtos
+              onChange: (evento) => {
+                if (evento.target.value.trim() === "") {
+                  mostraTodos();
+                }
+              },
+            })}
           />
           <button
             type="submit"
@@ -79,14 +85,6 @@ export function InputPesquisa({ setProdutos }: InputPesquisaProps) {
           </button>
         </div>
       </form>
-
-      <button
-        type="button"
-        className="ms-2 rounded-lg bg-secundaria px-6 py-4 text-sm font-medium text-white hover:bg-primaria focus:outline-none focus:ring-4 focus:ring-primaria/30"
-        onClick={mostraDestaques}
-      >
-        Todos
-      </button>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import AdminDashboardCard from "./components/AdminDashboardCard";
+import AdminDashboardGrafico from "./components/AdminDashboardGrafico";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -15,6 +16,12 @@ const indicadores = [
 type StatusPedido = (typeof indicadores)[number]["status"];
 type ContagemPedido = { status: StatusPedido; quantidade: number };
 type TotaisPedidos = Record<StatusPedido, number>;
+type Ranking = { descricao: string; quantidade: number }[];
+type DadosGraficos = {
+  refeicoes: Ranking;
+  bebidas: Ranking;
+  pedidosPorDia: { dia: string; quantidade: number }[];
+};
 
 const totaisIniciais: TotaisPedidos = {
   PENDENTE: 0,
@@ -30,6 +37,7 @@ export default function AdminDashboard() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [tentativa, setTentativa] = useState(0);
+  const [graficos, setGraficos] = useState<DadosGraficos | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -81,6 +89,40 @@ export default function AdminDashboard() {
     return () => controller.abort();
   }, [tentativa]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function carregarGraficos() {
+      const token = localStorage.getItem("adminToken");
+      if (!token) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${apiUrl}/pedidos/dashboard`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error(`Falha ao carregar gráficos (HTTP ${response.status})`);
+        }
+        setGraficos(await response.json());
+      } catch (error) {
+        if (controller.signal.aborted) {
+          return;
+        }
+        console.error("Erro ao carregar gráficos do dashboard:", error);
+        setErro("Não foi possível carregar os gráficos.");
+      }
+    }
+
+    carregarGraficos();
+    return () => controller.abort();
+  }, [tentativa]);
+
+  const ranking = (dados: Ranking) =>
+    dados.map(({ descricao, quantidade }) => ({ rotulo: descricao, quantidade }));
+
   return (
     <section className="mx-auto w-full max-w-6xl space-y-8">
       <h2 className="text-3xl font-bold tracking-tight text-gray-900">
@@ -112,6 +154,29 @@ export default function AdminDashboard() {
           />
         ))}
       </div>
+      {graficos && (
+        <div className="grid gap-4 md:grid-cols-2">
+          <AdminDashboardGrafico
+            titulo="Refeições mais pedidas"
+            dados={ranking(graficos.refeicoes)}
+            horizontal
+          />
+          <AdminDashboardGrafico
+            titulo="Bebidas mais pedidas"
+            dados={ranking(graficos.bebidas)}
+            horizontal
+          />
+          <div className="md:col-span-2">
+            <AdminDashboardGrafico
+              titulo="Pedidos por dia (últimos 30 dias)"
+              dados={graficos.pedidosPorDia.map(({ dia, quantidade }) => ({
+                rotulo: `${dia.slice(8, 10)}/${dia.slice(5, 7)}`,
+                quantidade,
+              }))}
+            />
+          </div>
+        </div>
+      )}
     </section>
   );
 }

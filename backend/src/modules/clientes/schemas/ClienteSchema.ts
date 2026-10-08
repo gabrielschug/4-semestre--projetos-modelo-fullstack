@@ -12,7 +12,7 @@ export const clienteCadastroSchema = z.object({
   rua: z.string().trim().min(1, "Informe a rua"),
   numero: z.string().trim().min(1, "Informe o número"),
   obs: z.string().trim().max(200, "Observação muito longa").optional(),
-  bairroID: z.string().uuid("Selecione um bairro válido"),
+  bairroID: z.string().guid("Selecione um bairro válido"),
 })
 
 export const clienteLoginSchema = z.object({

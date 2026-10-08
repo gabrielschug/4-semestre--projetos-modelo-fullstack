@@ -17,6 +17,11 @@ pedidoRouter.get(
   controller.contarPedidosPorStatus.bind(controller),
 );
 pedidoRouter.get(
+  "/dashboard",
+  autenticarAdmin,
+  controller.dadosDashboard.bind(controller),
+);
+pedidoRouter.get(
   "/",
   autenticarAdmin,
   controller.listarPedidos.bind(controller),

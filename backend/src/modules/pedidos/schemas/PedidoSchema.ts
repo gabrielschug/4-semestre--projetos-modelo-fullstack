@@ -8,7 +8,7 @@ export const criarPedidoSchema = z.object({
     telefone: z.string().max(12).min(10, "Telefone inválido"),
     rua: z.string().min(1, "A rua é obrigatória"),
     numero: z.string().min(1, "O número é obrigatório"),
-    bairroID: z.string().uuid("ID do bairro inválido"),
+    bairroID: z.string().guid("ID do bairro inválido"),
   }),
   pedido: z.object({
     modalEntrega: z.enum(["DELIVERY", "RETIRADA"], {
@@ -22,7 +22,7 @@ export const criarPedidoSchema = z.object({
     itens: z
       .array(
         z.object({
-          produtoID: z.string().uuid("ID do produto inválido"),
+          produtoID: z.string().guid("ID do produto inválido"),
           nomeProduto: z.string(),
           quantidade: z
             .number()

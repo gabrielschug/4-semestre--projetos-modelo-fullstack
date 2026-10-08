@@ -15,6 +15,10 @@ produtoRouter.get("/", (req, res) => controller.listarProdutosDisponiveis(res));
 produtoRouter.get("/todos", autenticarAdmin, (_req, res) =>
   controller.listarTodos(res),
 );
+produtoRouter.get("/destaques", (_req, res) => controller.listarDestaques(res));
+produtoRouter.get("/categoria/:categoria", (req, res) =>
+  controller.pesquisarPorCategoria(req, res),
+);
 produtoRouter.post("/", autenticarAdmin, (req, res) =>
   controller.criar(req, res),
 );
