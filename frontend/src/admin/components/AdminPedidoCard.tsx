@@ -5,10 +5,12 @@ import {
   CircleX,
   Clock3,
   MapPin,
+  MessageCircle,
   Package,
   Phone,
 } from "lucide-react";
 import type { PedidoAdmin, StatusPedido } from "../utils/AdminPedidoType";
+import { linkWhatsapp, mensagemDoCard } from "../utils/mensagemWhatsapp";
 import AdminPedidoCancelar from "./AdminPedidoCancelar";
 
 type AdminPedidoCardProps = {
@@ -68,6 +70,10 @@ export default function AdminPedidoCard({
   const [confirmacaoAberta, setConfirmacaoAberta] = useState(false);
   const destino = proximoStatus(pedido);
   const statusAnteriorPedido = statusAnterior(pedido);
+  const mensagemWhatsapp =
+    pedido.status === "CANCELADO" || pedido.status === "ENTREGUE"
+      ? null
+      : mensagemDoCard(pedido);
 
   return (
     <article className="space-y-2 rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
@@ -146,6 +152,19 @@ export default function AdminPedidoCard({
           </p>
         )}
       </div>
+
+      {mensagemWhatsapp && (
+        <a
+          href={linkWhatsapp(pedido.cliente.telefone, mensagemWhatsapp.texto)}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Abre o WhatsApp com a mensagem pronta para enviar ao cliente"
+          className="flex w-full items-center justify-center gap-1.5 rounded-md bg-green-600 px-2 py-1.5 text-[11px] font-semibold text-white hover:bg-green-700"
+        >
+          <MessageCircle aria-hidden="true" className="h-3.5 w-3.5" />
+          WhatsApp: {mensagemWhatsapp.rotulo}
+        </a>
+      )}
 
       <div className="flex items-center justify-between gap-2 border-t border-gray-100 pt-2">
         <span className="text-xs font-bold text-gray-900">

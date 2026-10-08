@@ -5,6 +5,10 @@ import AdminKanbanColuna, {
   type ConfiguracaoColunaKanban,
 } from "./components/AdminKanbanColuna";
 import type { PedidoAdmin, StatusPedido } from "./utils/AdminPedidoType";
+import {
+  linkWhatsapp,
+  mensagemMudancaStatus,
+} from "./utils/mensagemWhatsapp";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 const intervaloAtualizacaoMs = 60_000;
@@ -119,6 +123,15 @@ export default function AdminKanban() {
       return;
     }
 
+    // A aba precisa ser aberta ainda no clique; depois do await o
+    // navegador trata como pop-up e bloqueia
+    const mensagemAviso = mensagemMudancaStatus(pedido, status);
+    const janelaWhatsapp = mensagemAviso ? window.open("", "_blank") : null;
+    if (janelaWhatsapp) {
+      janelaWhatsapp.opener = null;
+      janelaWhatsapp.document.title = "Abrindo WhatsApp...";
+    }
+
     setAtualizando(pedido.id);
     try {
       const response = await fetch(
@@ -148,7 +161,24 @@ export default function AdminKanban() {
       const tituloStatus =
         colunas.find((coluna) => coluna.status === status)?.titulo ?? status;
       toast.success(`Pedido atualizado: ${tituloStatus}.`);
+
+      if (mensagemAviso) {
+        const link = linkWhatsapp(pedido.cliente.telefone, mensagemAviso);
+        if (janelaWhatsapp && !janelaWhatsapp.closed) {
+          janelaWhatsapp.location.href = link;
+        } else {
+          // Pop-up bloqueado: oferece abrir com um novo clique
+          toast.info("Avise o cliente pelo WhatsApp.", {
+            action: {
+              label: "Abrir WhatsApp",
+              onClick: () => window.open(link, "_blank", "noopener"),
+            },
+            duration: 15_000,
+          });
+        }
+      }
     } catch (error) {
+      janelaWhatsapp?.close();
       console.error("Erro ao atualizar status do pedido:", error);
       toast.error(
         error instanceof Error
