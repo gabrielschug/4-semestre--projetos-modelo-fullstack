@@ -19,6 +19,17 @@ const numeroPedido = (pedido: PedidoAdmin) =>
 const enderecoCliente = (pedido: PedidoAdmin) =>
   `${pedido.cliente.rua}, ${pedido.cliente.numero} · ${pedido.cliente.bairro.bairro}`;
 
+function valoresPedido(pedido: PedidoAdmin) {
+  const subtotal = pedido.itens.reduce(
+    (soma, item) => soma + item.quantidade * item.precoProduto,
+    0,
+  );
+  const taxaEntrega =
+    pedido.modalEntrega === "DELIVERY" ? pedido.valorTotal - subtotal : 0;
+
+  return { subtotal, taxaEntrega, total: pedido.valorTotal };
+}
+
 // O cadastro guarda só DDD + número; o wa.me exige o código do país
 export function linkWhatsapp(telefone: string, mensagem: string) {
   const digitos = telefone.replace(/\D/g, "");
@@ -27,11 +38,7 @@ export function linkWhatsapp(telefone: string, mensagem: string) {
 }
 
 export function mensagemResumoPedido(pedido: PedidoAdmin) {
-  const subtotal = pedido.itens.reduce(
-    (soma, item) => soma + item.quantidade * item.precoProduto,
-    0,
-  );
-  const taxaEntrega = pedido.valorTotal - subtotal;
+  const { subtotal, taxaEntrega, total } = valoresPedido(pedido);
   const ehDelivery = pedido.modalEntrega === "DELIVERY";
 
   const linhas = [
@@ -52,7 +59,7 @@ export function mensagemResumoPedido(pedido: PedidoAdmin) {
   }
 
   linhas.push(
-    `*Total: ${formatarMoeda(pedido.valorTotal)}*`,
+    `*Total: ${formatarMoeda(total)}*`,
     "",
     `Pagamento: ${nomesPagamento[pedido.pagamento] ?? pedido.pagamento}`,
     ehDelivery
@@ -76,22 +83,28 @@ export function mensagemResumoPedido(pedido: PedidoAdmin) {
 }
 
 export function mensagemSaiuParaEntrega(pedido: PedidoAdmin) {
+  const { subtotal, taxaEntrega, total } = valoresPedido(pedido);
+
   return [
     `Olá, *${pedido.cliente.nome}*! 🛵`,
     `Seu pedido *#${numeroPedido(pedido)}* saiu para entrega e logo chega em ${enderecoCliente(pedido)}.`,
     "",
-    `Total a pagar: *${formatarMoeda(pedido.valorTotal)}* (${nomesPagamento[pedido.pagamento] ?? pedido.pagamento})`,
+    `Subtotal: ${formatarMoeda(subtotal)}`,
+    `Taxa de entrega: ${formatarMoeda(taxaEntrega)}`,
+    `Total a pagar: *${formatarMoeda(total)}* (${nomesPagamento[pedido.pagamento] ?? pedido.pagamento})`,
     "",
     `Obrigado pela preferência! — ${nomeRestaurante}`,
   ].join("\n");
 }
 
 export function mensagemProntoParaRetirada(pedido: PedidoAdmin) {
+  const { total } = valoresPedido(pedido);
+
   return [
     `Olá, *${pedido.cliente.nome}*! ✅`,
     `Seu pedido *#${numeroPedido(pedido)}* está pronto para retirada.`,
     "",
-    `Total a pagar: *${formatarMoeda(pedido.valorTotal)}* (${nomesPagamento[pedido.pagamento] ?? pedido.pagamento})`,
+    `Total a pagar: *${formatarMoeda(total)}* (${nomesPagamento[pedido.pagamento] ?? pedido.pagamento})`,
     "",
     `Obrigado pela preferência! — ${nomeRestaurante}`,
   ].join("\n");
