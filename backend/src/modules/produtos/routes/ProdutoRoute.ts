@@ -22,6 +22,9 @@ produtoRouter.get("/categoria/:categoria", (req, res) =>
 produtoRouter.post("/", autenticarAdmin, (req, res) =>
   controller.criar(req, res),
 );
+produtoRouter.post("/gerar-frase", autenticarAdmin, (req, res) =>
+  controller.gerarFraseVenda(req, res),
+);
 produtoRouter.put("/:id", autenticarAdmin, (req, res) =>
   controller.atualizar(req, res),
 );

@@ -46,6 +46,12 @@ const produtoEntrada = {
     valorDesconto: { type: "number", nullable: true },
     disponibilidade: { type: "boolean" },
     especificacoes: { type: "string", nullable: true },
+    fraseVenda: {
+      type: "string",
+      nullable: true,
+      description:
+        "Frase curta de venda. Opcional: no cadastro, se vier vazia, é gerada pela IA (Gemini).",
+    },
     fotoUrl: { type: "string", nullable: true },
     tempoPreparoMinutos: { type: "integer", nullable: true },
   },
@@ -286,6 +292,39 @@ export const swaggerDocumento = {
           tempoPreparoMinutos: 15,
         }),
         responses: { 201: resposta("Criado", ref("Produto")), 400: r400, 401: r401 },
+      },
+    },
+    "/produtos/gerar-frase": {
+      post: {
+        tags: ["Produtos"],
+        summary: "Gerar frase de venda gaúcha com IA (Gemini)",
+        security: protegida,
+        requestBody: corpo(
+          {
+            type: "object",
+            required: ["descricao"],
+            properties: {
+              descricao: { type: "string" },
+              categoria: { type: "string", nullable: true },
+              especificacoes: { type: "string", nullable: true },
+            },
+          },
+          {
+            descricao: "Ala Minuta de Vazio",
+            categoria: "Refeição",
+            especificacoes: "Arroz, feijão, ovo, salada e fritas",
+          },
+        ),
+        responses: {
+          200: resposta("OK", {
+            type: "object",
+            properties: { fraseVenda: { type: "string" } },
+          }),
+          400: r400,
+          401: r401,
+          502: resposta("Falha ao gerar a frase no Gemini"),
+          503: resposta("GEMINI_API_KEY não configurada no servidor"),
+        },
       },
     },
     "/produtos/todos": {

@@ -6,6 +6,7 @@ export interface ProdutoType{
     valorDesconto: number | null
     disponibilidade: boolean
     especificacoes: string | null
+    fraseVenda: string | null
     fotoUrl: string | null
     tempoPreparoMinutos: number | null
     adminID: string
@@ -25,6 +26,7 @@ export type ProdutoEdicaoType = Pick<
     | "valorDesconto"
     | "disponibilidade"
     | "especificacoes"
+    | "fraseVenda"
     | "fotoUrl"
     | "tempoPreparoMinutos"
 >

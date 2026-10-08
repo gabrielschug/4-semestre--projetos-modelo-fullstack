@@ -49,6 +49,7 @@ model Produto {
   valorDesconto       Float?        @default(0)
   disponibilidade     Boolean       @default(true)
   especificacoes      String?
+  fraseVenda          String?
   fotoUrl             String?
   tempoPreparoMinutos Int?
   adminID             String

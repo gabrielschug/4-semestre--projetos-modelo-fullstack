@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button, TableCell, TableRow } from "flowbite-react";
+import { Sparkles } from "lucide-react";
 import type { ProdutoEdicaoType, ProdutoType } from "../../utils/ProdutoType";
 
 type AdminProdutoRowProps = {
@@ -11,6 +12,9 @@ type AdminProdutoRowProps = {
   ) => Promise<ProdutoType>;
   onDelete?: (id: string) => Promise<void>;
   onCancel?: () => void;
+  onGerarFrase: (
+    dados: Pick<ProdutoEdicaoType, "descricao" | "categoria" | "especificacoes">,
+  ) => Promise<string>;
 };
 
 const formatarMoeda = (valor: number) =>
@@ -28,9 +32,11 @@ export default function AdminProdutoRow({
   onSave,
   onDelete,
   onCancel,
+  onGerarFrase,
 }: AdminProdutoRowProps) {
   const [editando, setEditando] = useState(isNew);
   const [salvando, setSalvando] = useState(false);
+  const [gerandoFrase, setGerandoFrase] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [rascunho, setRascunho] = useState<ProdutoEdicaoType>(() =>
     criarRascunho(produto),
@@ -44,6 +50,7 @@ export default function AdminProdutoRow({
       valorDesconto: item.valorDesconto,
       disponibilidade: item.disponibilidade,
       especificacoes: item.especificacoes,
+      fraseVenda: item.fraseVenda,
       fotoUrl: item.fotoUrl,
       tempoPreparoMinutos: item.tempoPreparoMinutos,
     };
@@ -69,6 +76,32 @@ export default function AdminProdutoRow({
       );
     } finally {
       setSalvando(false);
+    }
+  }
+
+  async function gerarFrase() {
+    if (!rascunho.descricao.trim()) {
+      setErro("Informe a descrição antes de gerar a frase.");
+      return;
+    }
+
+    setGerandoFrase(true);
+    setErro(null);
+    try {
+      const fraseVenda = await onGerarFrase({
+        descricao: rascunho.descricao,
+        categoria: rascunho.categoria,
+        especificacoes: rascunho.especificacoes,
+      });
+      setRascunho((atual) => ({ ...atual, fraseVenda }));
+    } catch (error) {
+      setErro(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível gerar a frase com IA.",
+      );
+    } finally {
+      setGerandoFrase(false);
     }
   }
 
@@ -191,6 +224,40 @@ export default function AdminProdutoRow({
             }
           />
         </TableCell>
+        <TableCell className="w-56 max-w-56 overflow-hidden">
+          <div className="flex flex-col gap-1.5">
+            <textarea
+              aria-label="Frase de venda"
+              className={`${inputClassName} h-16 w-52 resize-none`}
+              rows={2}
+              maxLength={200}
+              placeholder={
+                isNew ? "Vazio = gerada pela IA ao salvar" : "Opcional"
+              }
+              value={rascunho.fraseVenda ?? ""}
+              onChange={(event) =>
+                setRascunho({
+                  ...rascunho,
+                  fraseVenda:
+                    event.target.value === "" ? null : event.target.value,
+                })
+              }
+            />
+            <button
+              type="button"
+              onClick={gerarFrase}
+              disabled={gerandoFrase || salvando}
+              className="inline-flex w-52 items-center justify-center gap-1.5 rounded-md border border-orange-300 bg-orange-50 px-2 py-1 text-xs font-semibold text-orange-800 hover:bg-orange-100 disabled:cursor-wait disabled:opacity-60"
+            >
+              <Sparkles aria-hidden="true" className="h-3.5 w-3.5" />
+              {gerandoFrase
+                ? "Gerando..."
+                : rascunho.fraseVenda
+                  ? "Gerar outra com IA"
+                  : "Gerar com IA"}
+            </button>
+          </div>
+        </TableCell>
         <TableCell className="w-40 max-w-40 overflow-hidden">
           <input
             aria-label="URL da foto"
@@ -225,7 +292,12 @@ export default function AdminProdutoRow({
         </TableCell>
         <TableCell>
           <div className="flex min-w-32 flex-col gap-2">
-            <Button size="xs" color="success" onClick={salvar} disabled={salvando}>
+            <Button
+              size="xs"
+              color="success"
+              onClick={salvar}
+              disabled={salvando || gerandoFrase}
+            >
               {salvando ? "Salvando..." : "Salvar"}
             </Button>
             <Button
@@ -302,6 +374,14 @@ export default function AdminProdutoRow({
           title={produto.especificacoes ?? ""}
         >
           {produto.especificacoes ?? "—"}
+        </span>
+      </TableCell>
+      <TableCell className="w-56 max-w-56 overflow-hidden">
+        <span
+          className="block truncate whitespace-nowrap italic"
+          title={produto.fraseVenda ?? ""}
+        >
+          {produto.fraseVenda ?? "—"}
         </span>
       </TableCell>
       <TableCell className="w-48 max-w-48 overflow-hidden">
