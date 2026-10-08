@@ -68,6 +68,12 @@ export default function AdminPedidoCard({
   onAlterarStatus,
 }: AdminPedidoCardProps) {
   const [confirmacaoAberta, setConfirmacaoAberta] = useState(false);
+  const subtotal = pedido.itens.reduce(
+    (soma, item) => soma + item.quantidade * item.precoProduto,
+    0,
+  );
+  const taxaEntrega =
+    pedido.modalEntrega === "DELIVERY" ? pedido.valorTotal - subtotal : 0;
   const destino = proximoStatus(pedido);
   const statusAnteriorPedido = statusAnterior(pedido);
   const mensagemWhatsapp =
@@ -115,6 +121,19 @@ export default function AdminPedidoCard({
           </li>
         ))}
       </ul>
+
+      <div className="space-y-1 text-xs text-gray-600">
+        <p className="flex justify-between gap-2">
+          <span>Subtotal</span>
+          <span>{formatarMoeda(subtotal)}</span>
+        </p>
+        {pedido.modalEntrega === "DELIVERY" && (
+          <p className="flex justify-between gap-2">
+            <span>Taxa de entrega</span>
+            <span>{formatarMoeda(taxaEntrega)}</span>
+          </p>
+        )}
+      </div>
 
       <div className="space-y-1.5 text-xs text-gray-600">
         <p className="flex items-center gap-2">
