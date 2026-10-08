@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useAdminStore } from "../../context/AdminContext";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
@@ -9,7 +10,9 @@ import {
   LayoutDashboardIcon,
   LocationEdit,
   LogOutIcon,
+  UserPlus,
 } from "lucide-react";
+import AdminCadastroModal from "./AdminCadastroModal";
 
 type AdminSidebarProps = {
   collapsed: boolean;
@@ -38,6 +41,7 @@ export default function AdminSidebar({
 }: AdminSidebarProps) {
   const navigate = useNavigate();
   const deslogaAdmin = useAdminStore((state) => state.deslogaAdmin);
+  const [cadastroAberto, setCadastroAberto] = useState(false);
 
   function adminSair() {
     if (confirm("Confirma Saída?")) {
@@ -127,10 +131,26 @@ export default function AdminSidebar({
 
         <button
           type="button"
+          onClick={() => {
+            onCloseMobile();
+            setCadastroAberto(true);
+          }}
+          title={collapsed ? "Novo admin" : undefined}
+          aria-label={collapsed ? "Novo admin" : undefined}
+          className={`mt-auto flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors hover:bg-orange-50 hover:text-orange-800 ${
+            collapsed ? "md:justify-center md:px-2" : ""
+          }`}
+        >
+          <UserPlus aria-hidden="true" className="h-5 w-5 shrink-0" />
+          <span className={collapsed ? "md:hidden" : ""}>Novo admin</span>
+        </button>
+
+        <button
+          type="button"
           onClick={adminSair}
           title={collapsed ? "Sair" : undefined}
           aria-label={collapsed ? "Sair" : undefined}
-          className={`mt-auto flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700 ${
+          className={`flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700 ${
             collapsed ? "md:justify-center md:px-2" : ""
           }`}
         >
@@ -138,6 +158,11 @@ export default function AdminSidebar({
           <span className={collapsed ? "md:hidden" : ""}>Sair</span>
         </button>
       </nav>
+
+      <AdminCadastroModal
+        open={cadastroAberto}
+        onClose={() => setCadastroAberto(false)}
+      />
     </aside>
   );
 }
