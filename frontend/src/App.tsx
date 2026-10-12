@@ -33,9 +33,22 @@ export default function App() {
 
   useEffect(() => {
     async function buscaDados() {
-      const response = await fetch(`${apiUrl}/produtos`);
-      const dados = await response.json();
-      setProdutos(dados);
+      try {
+        const response = await fetch(`${apiUrl}/produtos`);
+        if (!response.ok) {
+          throw new Error(`Falha ao buscar produtos: HTTP ${response.status}`);
+        }
+
+        const dados: unknown = await response.json();
+        if (!Array.isArray(dados)) {
+          throw new Error("A resposta de produtos tem formato inválido");
+        }
+
+        setProdutos(dados);
+      } catch (error) {
+        console.error("Erro ao buscar produtos:", error);
+        toast.error("Não foi possível carregar o cardápio. Tente novamente.");
+      }
     }
     buscaDados();
 
