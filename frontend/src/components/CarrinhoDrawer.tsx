@@ -58,10 +58,19 @@ export function CarrinhoDrawer() {
       async function buscarBairros() {
         try {
           const response = await fetch(`${apiUrl}/bairros`);
-          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(`Falha ao buscar bairros: HTTP ${response.status}`);
+          }
+
+          const data: unknown = await response.json();
+          if (!Array.isArray(data)) {
+            throw new Error("A resposta de bairros tem formato inválido");
+          }
+
           setListaBairros(data);
         } catch (error) {
           console.error("Erro ao buscar bairros:", error);
+          toast.error("Não foi possível carregar os bairros de entrega.");
         }
       }
       buscarBairros();
