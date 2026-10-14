@@ -16,7 +16,7 @@ type AdminKanbanColunaProps = {
   coluna: ConfiguracaoColunaKanban;
   pedidos: PedidoAdmin[];
   carregando: boolean;
-  pedidoAtualizando: string | null;
+  pedidoAtualizando: number | null;
   onAlterarStatus: (pedido: PedidoAdmin, status: StatusPedido) => void;
 };
 

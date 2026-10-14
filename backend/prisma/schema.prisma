@@ -17,32 +17,83 @@ model Admin {
 }
 
 model ValorEntrega {
-  id                  String    @id @default(uuid())
-  bairro              String    @unique
+  id                  Int    @id @default(autoincrement())
+  bairro              String @unique
   valor               Float
-  tempoEntregaMinutos Int       @default(30)
-  clientes            Cliente[]
+  tempoEntregaMinutos Int    @default(30)
+
+  enderecos Endereco[]
 
   @@map("valores_entregas")
 }
 
 model Cliente {
-  id       String       @id @default(uuid())
+  id       String  @id @default(uuid())
   nome     String
-  telefone String
+  telefone String  @unique
   senha    String?
-  rua      String
-  numero   String
-  obs      String?
-  bairroID String
-  bairro   ValorEntrega @relation(fields: [bairroID], references: [id])
-  pedidos  Pedido[]
+
+  enderecos Endereco[]
+  pedidos   Pedido[]
 
   @@map("clientes")
 }
 
+model Endereco {
+  id     Int     @id @default(autoincrement())
+  titulo String
+  rua    String
+  numero String
+  obs    String?
+
+  bairroID  Int
+  bairro    ValorEntrega @relation(fields: [bairroID], references: [id])
+  clienteID String
+  cliente   Cliente      @relation(fields: [clienteID], references: [id])
+
+  @@map("enderecos_clientes")
+}
+
+model Pedido {
+  id                        Int             @id @default(autoincrement())
+  modalEntrega              ModalEntrega
+  pagamento                 MetodoPagamento
+  valorTotal                Float
+  status                    StatusPedido    @default(PENDENTE)
+  dataHora                  DateTime        @default(now())
+  tempoTotalEstimadoMinutos Int
+  anotacaoCliente           String?
+  anotacaoAdm               String?
+
+  ruaEntrega              String?
+  numeroEntrega           String?
+  obsEntrega              String?
+  nomeBairroEntrega       String?
+  valorTaxaEntrega        Float?
+
+  clienteID String
+  cliente   Cliente       @relation(fields: [clienteID], references: [id])
+  itens     ItensPedido[]
+
+  @@map("pedidos")
+}
+
+model ItensPedido {
+  id           Int   @id @default(autoincrement())
+  quantidade   Int
+  precoProduto Float
+  avaliacao    Int?  @db.SmallInt
+
+  pedidoID  Int
+  pedido    Pedido  @relation(fields: [pedidoID], references: [id])
+  produtoID Int
+  produto   Produto @relation(fields: [produtoID], references: [id])
+
+  @@map("itens_pedidos")
+}
+
 model Produto {
-  id                  String        @id @default(uuid())
+  id                  Int           @id @default(autoincrement())
   descricao           String
   categoria           String
   precoBase           Float
@@ -57,36 +108,6 @@ model Produto {
   admin               Admin         @relation(fields: [adminID], references: [id])
 
   @@map("produtos")
-}
-
-model Pedido {
-  id                        String          @id @default(uuid())
-  status                    StatusPedido    @default(PENDENTE)
-  dataHora                  DateTime        @default(now())
-  modalEntrega              ModalEntrega
-  pagamento                 MetodoPagamento
-  valorTotal                Float
-  tempoTotalEstimadoMinutos Int
-  anotacaoCliente           String?
-  anotacaoAdm               String?
-  clienteID                 String
-  itens                     ItensPedido[]
-  cliente                   Cliente         @relation(fields: [clienteID], references: [id])
-
-  @@map("pedidos")
-}
-
-model ItensPedido {
-  id           String  @id @default(uuid())
-  quantidade   Int
-  precoProduto Float
-  avaliacao    Int?    @db.SmallInt
-  pedidoID     String
-  produtoID    String
-  pedido       Pedido  @relation(fields: [pedidoID], references: [id])
-  produto      Produto @relation(fields: [produtoID], references: [id])
-
-  @@map("itens_pedidos")
 }
 
 model Configuracao {

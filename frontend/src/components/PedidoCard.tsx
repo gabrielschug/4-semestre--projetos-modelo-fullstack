@@ -5,10 +5,10 @@ import type { PedidoType } from "../utils/PedidoType";
 interface PedidoCardProps {
   pedido: PedidoType;
   acaoEmAndamento: string;
-  onCancelar: (pedidoID: string) => void;
+  onCancelar: (pedidoID: number) => void;
   onAvaliar: (
-    pedidoID: string,
-    itemID: string,
+    pedidoID: number,
+    itemID: number,
     avaliacao: number,
   ) => void;
 }
@@ -153,10 +153,10 @@ export function PedidoCard({
             color="red"
             outline
             className="w-full cursor-poiter lg:w-auto"
-            disabled={acaoEmAndamento === pedido.id}
+            disabled={acaoEmAndamento === String(pedido.id)}
             onClick={() => onCancelar(pedido.id)}
           >
-            {acaoEmAndamento === pedido.id
+            {acaoEmAndamento === String(pedido.id)
               ? "Cancelando..."
               : "Cancelar pedido"}
           </Button>

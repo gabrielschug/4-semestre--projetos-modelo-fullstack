@@ -14,10 +14,10 @@ const formatarMoeda = (valor: number) =>
   }).format(valor);
 
 const numeroPedido = (pedido: PedidoAdmin) =>
-  pedido.id.slice(0, 8).toUpperCase();
+  String(pedido.id);
 
 const enderecoCliente = (pedido: PedidoAdmin) =>
-  `${pedido.cliente.rua}, ${pedido.cliente.numero} · ${pedido.cliente.bairro.bairro}`;
+  `${pedido.ruaEntrega}, ${pedido.numeroEntrega} · ${pedido.nomeBairroEntrega}`;
 
 function valoresPedido(pedido: PedidoAdmin) {
   const subtotal = pedido.itens.reduce(

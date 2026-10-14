@@ -25,7 +25,7 @@ export class ProdutoService {
     return await this.produtoRepository.pesquisarPorCategoria(categoria);
   }
 
-  async atualizar(id: string, dados: AtualizarProdutoInput) {
+  async atualizar(id: number, dados: AtualizarProdutoInput) {
     return await this.produtoRepository.atualizar(id, dados);
   }
 
@@ -51,7 +51,7 @@ export class ProdutoService {
     return await gerarFraseVenda(dados);
   }
 
-  async excluir(id: string) {
+  async excluir(id: number) {
     return await this.produtoRepository.excluir(id);
   }
 
@@ -64,7 +64,7 @@ export class ProdutoService {
     }
   }
 
-  async PesquisarProdutoPorId(id: string) {
+  async PesquisarProdutoPorId(id: number) {
     return await this.produtoRepository.PesquisarProdutoPorId(id);
   }
 }

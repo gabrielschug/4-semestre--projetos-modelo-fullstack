@@ -14,14 +14,14 @@ export const checkoutSchema = z
     }),
     modalEntrega: z.enum(["DELIVERY", "RETIRADA"]),
     pagamento: z.enum(["DINHEIRO", "MAQUININHA_CARTAO"]),
-    bairroID: z.string().trim().optional(),
+    bairroID: z.number().int().positive().optional(),
     rua: z.string().trim().optional(),
     numero: z.string().trim().optional(),
     anotacaoGeral: z.string().trim().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.modalEntrega === "DELIVERY") {
-      if (!data.bairroID || data.bairroID === "") {
+      if (!data.bairroID) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Selecione um bairro",

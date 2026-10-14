@@ -109,7 +109,10 @@ export class ProdutoController {
       const fraseVenda = await this.service.gerarFraseVenda(dados.data);
       return res.status(200).json({ fraseVenda });
     } catch (error) {
-      if (error instanceof Error && error.message === "GEMINI_NAO_CONFIGURADO") {
+      if (
+        error instanceof Error &&
+        error.message === "GEMINI_NAO_CONFIGURADO"
+      ) {
         return res.status(503).json({
           error: "Integração com IA não configurada (GEMINI_API_KEY ausente)",
         });
@@ -179,17 +182,17 @@ export class ProdutoController {
   }
 
   async PesquisarProdutoPorId(req: Request, res: Response): Promise<Response> {
-    const id = produtoIdSchema.safeParse(req.params.id);
-    if (!id.success) {
+    const resultado = produtoIdSchema.safeParse(req.params.id);
+    if (!resultado.success) {
       return res.status(400).json({ error: "ID do produto inválido" });
     }
 
     try {
-      const result = await this.service.PesquisarProdutoPorId(id.data);
-      if (!result) {
+      const produto = await this.service.PesquisarProdutoPorId(resultado.data);
+      if (!produto) {
         return res.status(404).json({ error: "Produto não encontrado" });
       }
-      return res.status(200).json(result);
+      return res.status(200).json(produto);
     } catch (error) {
       console.error(error);
       return res.status(500).json({

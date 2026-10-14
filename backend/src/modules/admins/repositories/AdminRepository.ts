@@ -21,7 +21,6 @@ export class AdminRepository {
   }
 
   async cadastrar(dados: CadastrarAdminInput, senhaHash: string) {
-    console.log("3. REPOSITORY: \n", dados, senhaHash);
     return await this.prisma.admin.create({
       data: {
         nome: dados.nome,

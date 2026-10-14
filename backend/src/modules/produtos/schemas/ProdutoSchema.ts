@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const produtoIdSchema = z.string();
+export const produtoIdSchema = z.coerce.number().int().positive();
 export const termoPesquisaSchema = z.string();
 
 export const atualizarProdutoSchema = z

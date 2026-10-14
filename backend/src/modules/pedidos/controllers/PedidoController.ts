@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import { PedidoService } from "../services/PedidoServices";
-import { CriarPedidoDTO } from "../types/PedidosType";
+import { criarPedidoSchema } from "../schemas/PedidoSchema";
 
 const clienteIdSchema = z.string().guid();
+const pedidoIdSchema = z.coerce.number().int().positive();
 const avaliacaoSchema = z.object({
   avaliacao: z.number().int().min(1).max(5),
 });
@@ -56,7 +57,7 @@ export class PedidoController {
   }
 
   async atualizarStatusPedido(req: Request, res: Response): Promise<Response> {
-    const pedidoID = clienteIdSchema.safeParse(req.params.pedidoId);
+    const pedidoID = pedidoIdSchema.safeParse(req.params.pedidoId);
     const body = z
       .object({ status: statusPedidoSchema })
       .safeParse(req.body);
@@ -116,7 +117,7 @@ export class PedidoController {
 
   async cancelarPedido(req: Request, res: Response): Promise<Response> {
     const clienteID = clienteIdSchema.safeParse(req.params.clienteId);
-    const pedidoID = z.string().guid().safeParse(req.params.pedidoId);
+    const pedidoID = pedidoIdSchema.safeParse(req.params.pedidoId);
     if (!clienteID.success || !pedidoID.success) {
       return res.status(400).json({ error: "Identificação inválida" });
     }
@@ -145,8 +146,8 @@ export class PedidoController {
 
   async avaliarItemPedido(req: Request, res: Response): Promise<Response> {
     const clienteID = clienteIdSchema.safeParse(req.params.clienteId);
-    const pedidoID = z.string().guid().safeParse(req.params.pedidoId);
-    const itemID = z.string().guid().safeParse(req.params.itemId);
+    const pedidoID = pedidoIdSchema.safeParse(req.params.pedidoId);
+    const itemID = pedidoIdSchema.safeParse(req.params.itemId);
     const body = avaliacaoSchema.safeParse(req.body);
     if (!clienteID.success || !pedidoID.success || !itemID.success) {
       return res.status(400).json({ error: "Identificação inválida" });
@@ -186,10 +187,16 @@ export class PedidoController {
   }
 
   async criarPedido(req: Request, res: Response) {
-    try {
-      const dados: CriarPedidoDTO = req.body;
+    const dados = criarPedidoSchema.safeParse(req.body);
+    if (!dados.success) {
+      return res.status(400).json({
+        erro: "Dados do pedido inválidos",
+        detalhe: dados.error.flatten().fieldErrors,
+      });
+    }
 
-      const pedido = await this.PedidoService.criarPedido(dados);
+    try {
+      const pedido = await this.PedidoService.criarPedido(dados.data);
 
       return res.status(201).json({
         mensagem: "Pedido criado com sucesso!",

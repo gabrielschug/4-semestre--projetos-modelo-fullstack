@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod";
 
 export const clienteCadastroSchema = z.object({
   nome: z.string().trim().min(3, "Informe seu nome completo"),
@@ -12,10 +12,10 @@ export const clienteCadastroSchema = z.object({
   rua: z.string().trim().min(1, "Informe a rua"),
   numero: z.string().trim().min(1, "Informe o número"),
   obs: z.string().trim().max(200, "Observação muito longa").optional(),
-  bairroID: z.string().guid("Selecione um bairro válido"),
-})
+  bairroID: z.coerce.number().int().positive("Selecione um bairro válido"),
+});
 
 export const clienteLoginSchema = z.object({
   telefone: z.string().trim().min(1, "Informe o telefone"),
   senha: z.string().min(1, "Informe a senha"),
-})
+});

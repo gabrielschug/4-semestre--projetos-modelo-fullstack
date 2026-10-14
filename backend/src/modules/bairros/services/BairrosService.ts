@@ -12,13 +12,13 @@ export class BairrosService {
   }
 
   async atualizarBairro(
-    id: string,
+    id: number,
     dados: { bairro: string; valor: number; tempoEntregaMinutos: number },
   ) {
     return await this.bairrosRepository.atualizarBairro(id, dados);
   }
 
-  async excluirBairro(id: string) {
+  async excluirBairro(id: number) {
     return await this.bairrosRepository.excluirBairro(id);
   }
 }

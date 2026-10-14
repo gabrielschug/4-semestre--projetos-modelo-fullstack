@@ -1,6 +1,6 @@
 export type ItemPedidoType = {
-  id: string;
-  produtoID: string;
+  id: number;
+  produtoID: number;
   avaliacao: number | null;
   produto: { descricao: string };
 };
