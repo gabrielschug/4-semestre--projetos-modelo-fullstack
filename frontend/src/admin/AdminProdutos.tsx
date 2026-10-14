@@ -67,7 +67,7 @@ export default function AdminProdutos() {
   }, [token, tentativa]);
 
   async function salvarProduto(
-    id: string | null,
+    id: number | null,
     dados: ProdutoEdicaoType,
   ): Promise<ProdutoType> {
     const tokenAdmin = token || localStorage.getItem("adminToken");
@@ -136,7 +136,7 @@ export default function AdminProdutos() {
     return resultado.fraseVenda as string;
   }
 
-  async function excluirProduto(id: string): Promise<void> {
+  async function excluirProduto(id: number): Promise<void> {
     const tokenAdmin = token || localStorage.getItem("adminToken");
     if (!tokenAdmin) {
       throw new Error("Sessão administrativa não encontrada. Entre novamente.");
@@ -207,7 +207,7 @@ export default function AdminProdutos() {
               <AdminProdutoRow
                 key="novo-produto"
                 produto={{
-                  id: "",
+                  id: 0,
                   descricao: "",
                   categoria: "",
                   precoBase: 0,

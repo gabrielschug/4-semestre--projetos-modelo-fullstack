@@ -7,7 +7,7 @@ export type StatusPedido =
   | "CANCELADO";
 
 export type PedidoAdmin = {
-  id: string;
+  id: number;
   status: StatusPedido;
   dataHora: string;
   tempoTotalEstimadoMinutos: number;
@@ -18,12 +18,13 @@ export type PedidoAdmin = {
   cliente: {
     nome: string;
     telefone: string;
-    rua: string;
-    numero: string;
-    bairro: { bairro: string };
   };
+  ruaEntrega: string | null;
+  numeroEntrega: string | null;
+  nomeBairroEntrega: string | null;
+  valorTaxaEntrega: number | null;
   itens: {
-    id: string;
+    id: number;
     quantidade: number;
     precoProduto: number;
     produto: { descricao: string };

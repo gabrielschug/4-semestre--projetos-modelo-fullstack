@@ -3,7 +3,7 @@ import { CircleAlert } from "lucide-react";
 
 type AdminPedidoCancelarProps = {
   open: boolean;
-  pedidoId: string;
+  pedidoId: number;
   salvando: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -30,7 +30,7 @@ export default function AdminPedidoCancelar({
           </h3>
           <p className="text-sm text-gray-600">
             Tem certeza de que deseja cancelar o pedido #
-            {pedidoId.slice(0, 8).toUpperCase()}? Esta ação não poderá ser
+            {pedidoId}? Esta ação não poderá ser
             desfeita.
           </p>
         </div>

@@ -7,8 +7,8 @@ export type BairroFormData = Omit<BairroType, "id">;
 type AdminLocaisRowProps = {
   bairro: BairroType;
   isNew?: boolean;
-  onSave: (id: string | null, dados: BairroFormData) => Promise<BairroType>;
-  onDelete?: (id: string) => Promise<void>;
+  onSave: (id: number | null, dados: BairroFormData) => Promise<BairroType>;
+  onDelete?: (id: number) => Promise<void>;
   onCancel?: () => void;
 };
 

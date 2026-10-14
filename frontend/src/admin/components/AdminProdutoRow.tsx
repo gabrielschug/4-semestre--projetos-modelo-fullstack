@@ -7,10 +7,10 @@ type AdminProdutoRowProps = {
   produto: ProdutoType;
   isNew?: boolean;
   onSave: (
-    id: string | null,
+    id: number | null,
     dados: ProdutoEdicaoType,
   ) => Promise<ProdutoType>;
-  onDelete?: (id: string) => Promise<void>;
+  onDelete?: (id: number) => Promise<void>;
   onCancel?: () => void;
   onGerarFrase: (
     dados: Pick<ProdutoEdicaoType, "descricao" | "categoria" | "especificacoes">,
@@ -134,7 +134,7 @@ export default function AdminProdutoRow({
         <TableCell className="w-32 max-w-32 overflow-hidden">
           <span
             className="block truncate whitespace-nowrap text-xs text-gray-500"
-            title={isNew ? "Novo produto" : produto.id}
+            title={isNew ? "Novo produto" : String(produto.id)}
           >
             {isNew ? "Novo" : produto.id}
           </span>
@@ -335,7 +335,7 @@ export default function AdminProdutoRow({
       <TableCell className="w-32 max-w-32 overflow-hidden">
         <span
           className="block truncate whitespace-nowrap text-xs text-gray-500"
-          title={produto.id}
+          title={String(produto.id)}
         >
           {isNew ? "Novo" : produto.id}
         </span>

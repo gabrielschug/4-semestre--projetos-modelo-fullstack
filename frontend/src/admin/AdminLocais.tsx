@@ -58,7 +58,7 @@ export default function AdminLocais() {
   }, [tentativa]);
 
   async function enviarLocal(
-    id: string | null,
+    id: number | null,
     dados: BairroFormData,
   ): Promise<BairroType> {
     const tokenAdmin = token || localStorage.getItem("adminToken");
@@ -107,7 +107,7 @@ export default function AdminLocais() {
     return bairroSalvo;
   }
 
-  async function excluirLocal(id: string): Promise<void> {
+  async function excluirLocal(id: number): Promise<void> {
     const tokenAdmin = token || localStorage.getItem("adminToken");
     if (!tokenAdmin) {
       throw new Error("Sessão administrativa não encontrada. Entre novamente.");
@@ -181,7 +181,7 @@ export default function AdminLocais() {
               <AdminLocaisRow
                 key="novo-local"
                 bairro={{
-                  id: "",
+                  id: 0,
                   bairro: "",
                   valor: 0,
                   tempoEntregaMinutos: 30,
