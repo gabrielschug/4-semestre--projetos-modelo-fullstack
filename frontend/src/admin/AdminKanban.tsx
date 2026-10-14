@@ -5,10 +5,7 @@ import AdminKanbanColuna, {
   type ConfiguracaoColunaKanban,
 } from "./components/AdminKanbanColuna";
 import type { PedidoAdmin, StatusPedido } from "./utils/AdminPedidoType";
-import {
-  linkWhatsapp,
-  mensagemMudancaStatus,
-} from "./utils/mensagemWhatsapp";
+import { linkWhatsapp, mensagemMudancaStatus } from "./utils/mensagemWhatsapp";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 const intervaloAtualizacaoMs = 60_000;
@@ -25,7 +22,7 @@ const colunas: ConfiguracaoColunaKanban[] = [
 export default function AdminKanban() {
   const [pedidos, setPedidos] = useState<PedidoAdmin[]>([]);
   const [carregando, setCarregando] = useState(true);
-  const [atualizando, setAtualizando] = useState<string | null>(null);
+  const [atualizando, setAtualizando] = useState<number | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [pesquisa, setPesquisa] = useState("");
   const [tentativa, setTentativa] = useState(0);
@@ -58,7 +55,9 @@ export default function AdminKanban() {
           signal: controller.signal,
         });
         if (!response.ok) {
-          throw new Error(`Falha ao carregar pedidos (HTTP ${response.status})`);
+          throw new Error(
+            `Falha ao carregar pedidos (HTTP ${response.status})`,
+          );
         }
         const dados: PedidoAdmin[] = await response.json();
         setPedidos(dados);
@@ -107,7 +106,7 @@ export default function AdminKanban() {
         pedido.id,
         pedido.cliente.nome,
         pedido.cliente.telefone,
-        pedido.cliente.bairro.bairro,
+        pedido.nomeBairroEntrega,
         ...pedido.itens.map((item) => item.produto.descricao),
       ]
         .join(" ")
@@ -191,7 +190,7 @@ export default function AdminKanban() {
   }
 
   return (
-    <section className="mx-auto flex h-full min-h-0 w-full max-w-[1600px] flex-1 flex-col gap-3 overflow-hidden">
+    <section className="mx-auto flex h-full min-h-0 w-full flex-1 flex-col gap-3 overflow-hidden">
       <header className="flex shrink-0 flex-wrap items-end justify-between gap-3">
         <div className="space-y-2">
           <h2 className="text-xl font-bold tracking-tight text-gray-900">

@@ -1,6 +1,9 @@
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import type { ProdutoType } from "../utils/ProdutoType";
+import {
+  validarListaProdutos,
+  type ProdutoType,
+} from "../utils/ProdutoType";
 import { Search } from "lucide-react";
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -11,9 +14,15 @@ type Inputs = {
 
 type InputPesquisaProps = {
   setProdutos: React.Dispatch<React.SetStateAction<ProdutoType[]>>;
+  aoIniciarBusca: () => void;
+  aoFinalizarBusca: () => void;
 };
 
-export function InputPesquisa({ setProdutos }: InputPesquisaProps) {
+export function InputPesquisa({
+  setProdutos,
+  aoIniciarBusca,
+  aoFinalizarBusca,
+}: InputPesquisaProps) {
   const { register, handleSubmit } = useForm<Inputs>();
 
   async function enviaPesquisa(data: Inputs) {
@@ -23,6 +32,7 @@ export function InputPesquisa({ setProdutos }: InputPesquisaProps) {
       return;
     }
 
+    aoIniciarBusca();
     try {
       const response = await fetch(
         `${apiUrl}/produtos/pesquisa/${encodeURIComponent(termo)}`,
@@ -31,7 +41,7 @@ export function InputPesquisa({ setProdutos }: InputPesquisaProps) {
         throw new Error(`Falha na pesquisa (HTTP ${response.status})`);
       }
 
-      const dados: ProdutoType[] = await response.json();
+      const dados = validarListaProdutos(await response.json());
       setProdutos(dados);
       if (dados.length === 0) {
         toast.info("Nenhum produto encontrado.");
@@ -39,21 +49,26 @@ export function InputPesquisa({ setProdutos }: InputPesquisaProps) {
     } catch (error) {
       console.error("Erro ao pesquisar produtos:", error);
       toast.error("Não foi possível realizar a busca. Tente novamente.");
+    } finally {
+      aoFinalizarBusca();
     }
   }
 
   async function mostraTodos() {
+    aoIniciarBusca();
     try {
       const response = await fetch(`${apiUrl}/produtos`);
       if (!response.ok) {
         throw new Error(`Falha ao listar produtos (HTTP ${response.status})`);
       }
 
-      const dados: ProdutoType[] = await response.json();
+      const dados = validarListaProdutos(await response.json());
       setProdutos(dados);
     } catch (error) {
       console.error("Erro ao listar produtos:", error);
       toast.error("Não foi possível carregar os produtos. Tente novamente.");
+    } finally {
+      aoFinalizarBusca();
     }
   }
 

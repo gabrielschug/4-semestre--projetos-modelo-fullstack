@@ -58,7 +58,6 @@ export class AdminService {
   }
 
   async cadastrar(dados: CadastrarAdminInput) {
-    console.log("2. SERVICE \n", dados);
     const senhaHash = await bcrypt.hash(
       dados.senha,
       quantidadeDeRodadasDeCriptografia,

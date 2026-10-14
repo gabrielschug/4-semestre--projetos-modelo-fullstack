@@ -8,7 +8,6 @@ export class AdminController {
   constructor(private readonly service: AdminService) {}
 
   async cadastrar(req: Request, res: Response): Promise<Response> {
-    console.log("1. CONTROLLER:\n", req.body);
     const validacao = adminCadastroSchema.safeParse(req.body);
     if (!validacao.success) {
       return res.status(400).json({
@@ -30,7 +29,6 @@ export class AdminController {
   }
 
   async login(req: RequisicaoComAdmin, res: Response): Promise<Response> {
-    console.log("1. CONTROLLERS:\n", req.body);
     const validacao = adminLoginSchema.safeParse(req.body);
     if (!validacao.success) {
       return res.status(400).json({ error: "Dados de login inválidos" });

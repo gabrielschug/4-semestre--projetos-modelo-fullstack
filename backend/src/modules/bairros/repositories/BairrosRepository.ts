@@ -18,7 +18,7 @@ export class BairrosRepository {
   }
 
   async atualizarBairro(
-    id: string,
+    id: number,
     dados: { bairro: string; valor: number; tempoEntregaMinutos: number },
   ) {
     const existente = await this.prisma.valorEntrega.findUnique({ where: { id } });
@@ -29,7 +29,7 @@ export class BairrosRepository {
     return await this.prisma.valorEntrega.update({ where: { id }, data: dados });
   }
 
-  async excluirBairro(id: string) {
+  async excluirBairro(id: number) {
     const existente = await this.prisma.valorEntrega.findUnique({
       where: { id },
       select: { id: true },
@@ -38,10 +38,10 @@ export class BairrosRepository {
       return "NAO_ENCONTRADO" as const;
     }
 
-    const clientesVinculados = await this.prisma.cliente.count({
+    const enderecosVinculados = await this.prisma.endereco.count({
       where: { bairroID: id },
     });
-    if (clientesVinculados > 0) {
+    if (enderecosVinculados > 0) {
       return "EM_USO" as const;
     }
 

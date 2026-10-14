@@ -89,7 +89,7 @@ export default function AdminPedidoCard({
             {pedido.cliente.nome}
           </p>
           <p className="mt-0.5 text-[11px] text-gray-500">
-            Pedido #{pedido.id.slice(0, 8).toUpperCase()}
+            Pedido #{pedido.id}
           </p>
         </div>
         <time
@@ -150,9 +150,9 @@ export default function AdminPedidoCard({
               className="mt-0.5 h-3 w-3 shrink-0"
             />
             <span>
-              {pedido.cliente.rua}, {pedido.cliente.numero}
+              {pedido.ruaEntrega}, {pedido.numeroEntrega}
               {" · "}
-              {pedido.cliente.bairro.bairro}
+              {pedido.nomeBairroEntrega}
             </span>
           </p>
         )}

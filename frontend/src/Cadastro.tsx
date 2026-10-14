@@ -33,7 +33,7 @@ function isBairroTypeArray(value: unknown): value is BairroType[] {
     Array.isArray(value) &&
     value.every(
       (bairro) =>
-        typeof bairro.id === "string" &&
+        typeof bairro.id === "number" &&
         typeof bairro.bairro === "string" &&
         typeof bairro.valor === "number" &&
         typeof bairro.tempoEntregaMinutos === "number",
@@ -277,7 +277,10 @@ export default function Cadastro() {
                 className={classeCampo}
                 disabled={carregandoBairros || erroBairros || bairros.length === 0}
                 aria-invalid={Boolean(errors.bairroID)}
-                {...register("bairroID")}
+                {...register("bairroID", {
+                  setValueAs: (value) =>
+                    value === "" ? Number.NaN : Number(value),
+                })}
               >
                 <option value="">
                   {carregandoBairros

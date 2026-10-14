@@ -14,7 +14,7 @@ const bairroSchema = z
   })
   .strict();
 
-const idSchema = z.string().guid("ID do bairro inválido");
+const idSchema = z.coerce.number().int().positive("ID do bairro inválido");
 
 export class BairrosController {
   constructor(private readonly service: BairrosService) {}
