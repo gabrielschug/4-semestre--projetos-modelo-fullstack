@@ -75,10 +75,10 @@ export default function MeusPedidos() {
     };
   }, [cliente.id, logaCliente]);
 
-  const cancelarPedido = async (pedidoID: string) => {
+  const cancelarPedido = async (pedidoID: number) => {
     if (!cliente.id) return;
 
-    setAcaoEmAndamento(pedidoID);
+    setAcaoEmAndamento(String(pedidoID));
     setErro("");
     setFeedback("");
     try {
@@ -112,8 +112,8 @@ export default function MeusPedidos() {
   };
 
   const avaliarItem = async (
-    pedidoID: string,
-    itemID: string,
+    pedidoID: number,
+    itemID: number,
     avaliacao: number,
   ) => {
     if (!cliente.id) return;

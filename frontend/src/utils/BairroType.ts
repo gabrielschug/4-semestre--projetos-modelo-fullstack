@@ -1,5 +1,5 @@
 export type BairroType = {
-    id: string
+    id: number
     bairro: string
     valor: number
     tempoEntregaMinutos: number

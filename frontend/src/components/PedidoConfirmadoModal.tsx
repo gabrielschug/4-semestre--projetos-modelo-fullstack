@@ -3,7 +3,7 @@ import { CircleCheck, Clock3, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 type PedidoConfirmadoModalProps = {
-  pedidoId: string;
+  pedidoId: number;
   tempoEstimadoMinutos: number;
   modalEntrega: "DELIVERY" | "RETIRADA";
   clienteLogado: boolean;

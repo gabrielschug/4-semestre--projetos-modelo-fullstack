@@ -1,22 +1,23 @@
 import { CardProduto } from "./components/CardProduto";
 import { InputPesquisa } from "./components/InputPesquisa";
 import { FiltroCategorias } from "./components/FiltroCategorias";
-import type { ProdutoType } from "./utils/ProdutoType";
-import { useEffect, useState } from "react";
+import { validarListaProdutos, type ProdutoType } from "./utils/ProdutoType";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useClienteStore } from "./context/ClienteContext";
 import ModalDetalhes from "./ModalDetalhes";
 import { CarrinhoDrawer } from "./components/CarrinhoDrawer";
-import { toast } from "sonner";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 interface AvaliacaoProduto {
-  produtoID: string;
+  produtoID: number;
   avaliacaoMedia: number;
 }
 
 export default function App() {
   const [produtos, setProdutos] = useState<ProdutoType[]>([]);
+  const [carregandoProdutos, setCarregandoProdutos] = useState(true);
+  const requisicoesProdutosAtivas = useRef(0);
   const [avaliacoes, setAvaliacoes] = useState<Record<string, number>>({});
   const { logaCliente } = useClienteStore();
   const [modalAberto, setModalAberto] = useState(false);
@@ -26,6 +27,19 @@ export default function App() {
     string | null
   >(null);
 
+  const iniciarBuscaProdutos = useCallback(() => {
+    requisicoesProdutosAtivas.current += 1;
+    setCarregandoProdutos(true);
+  }, []);
+
+  const finalizarBuscaProdutos = useCallback(() => {
+    requisicoesProdutosAtivas.current = Math.max(
+      0,
+      requisicoesProdutosAtivas.current - 1,
+    );
+    setCarregandoProdutos(requisicoesProdutosAtivas.current > 0);
+  }, []);
+
   const handleCliqueProduto = (produto: ProdutoType) => {
     setProdutoSelecionado(produto);
     setModalAberto(true);
@@ -33,9 +47,22 @@ export default function App() {
 
   useEffect(() => {
     async function buscaDados() {
-      const response = await fetch(`${apiUrl}/produtos`);
-      const dados = await response.json();
-      setProdutos(dados);
+      iniciarBuscaProdutos();
+      try {
+        const response = await fetch(`${apiUrl}/produtos`);
+        if (!response.ok) {
+          throw new Error(
+            `Falha ao carregar produtos (HTTP ${response.status})`,
+          );
+        }
+
+        const dados: unknown = await response.json();
+        setProdutos(validarListaProdutos(dados));
+      } catch (error) {
+        console.error("Erro ao carregar os produtos:", error);
+      } finally {
+        finalizarBuscaProdutos();
+      }
     }
     buscaDados();
 
@@ -59,7 +86,6 @@ export default function App() {
         );
       } catch (error) {
         console.error("Erro ao buscar avaliações dos produtos:", error);
-        toast.error("Não foi possível carregar as avaliações dos produtos.");
       }
     }
     buscaAvaliacoes();
@@ -82,7 +108,7 @@ export default function App() {
     if (idCliente) {
       buscaCliente(idCliente);
     }
-  }, [logaCliente]);
+  }, [finalizarBuscaProdutos, iniciarBuscaProdutos, logaCliente]);
 
   // Agrupa categorias ignorando maiúsculas/minúsculas e espaços extras
   const categorias = Array.from(
@@ -145,7 +171,11 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-fundo">
-      <InputPesquisa setProdutos={setProdutos} />
+      <InputPesquisa
+        setProdutos={setProdutos}
+        aoIniciarBusca={iniciarBuscaProdutos}
+        aoFinalizarBusca={finalizarBuscaProdutos}
+      />
       <FiltroCategorias
         categorias={categorias}
         categoriaSelecionada={categoriaAtiva}
@@ -183,20 +213,25 @@ export default function App() {
             </section>
           )}
 
-          {!temDestaques && !temNormais && (
+          {carregandoProdutos ? (
+            <p
+              role="status"
+              className="my-10 text-center text-secundaria/60"
+            >
+              Carregando produtos...
+            </p>
+          ) : !temDestaques && !temNormais ? (
             <p className="my-10 text-center text-secundaria/60">
               Nenhum produto encontrado.
             </p>
-          )}
+          ) : null}
         </div>
       </main>
 
       <ModalDetalhes
         produto={produtoSelecionado}
         avaliacaoMedia={
-          produtoSelecionado
-            ? avaliacoes[produtoSelecionado.id]
-            : undefined
+          produtoSelecionado ? avaliacoes[produtoSelecionado.id] : undefined
         }
         isOpen={modalAberto}
         onClose={() => setModalAberto(false)}

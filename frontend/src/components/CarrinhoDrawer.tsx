@@ -25,8 +25,9 @@ export function CarrinhoDrawer() {
   const { itens, drawerAberto, fecharDrawer, limparCarrinho } = useCarrinho();
   const cliente = useClienteStore((state) => state.cliente);
   const [listaBairros, setListaBairros] = useState<BairroType[]>([]);
+  const enderecoPrincipal = cliente.enderecos?.[0];
   const [pedidoConfirmado, setPedidoConfirmado] = useState<{
-    pedidoId: string;
+    pedidoId: number;
     tempoEstimadoMinutos: number;
     modalEntrega: "DELIVERY" | "RETIRADA";
   } | null>(null);
@@ -45,10 +46,10 @@ export function CarrinhoDrawer() {
   useEffect(() => {
     setValue("nome", cliente.id ? cliente.nome : "");
     setValue("telefone", cliente.id ? cliente.telefone : "");
-    setValue("bairroID", cliente.id ? cliente.bairroID : "");
-    setValue("rua", cliente.id ? cliente.rua : "");
-    setValue("numero", cliente.id ? cliente.numero : "");
-  }, [cliente, setValue]);
+    setValue("bairroID", enderecoPrincipal?.bairroID);
+    setValue("rua", enderecoPrincipal?.rua ?? "");
+    setValue("numero", enderecoPrincipal?.numero ?? "");
+  }, [cliente.id, cliente.nome, cliente.telefone, enderecoPrincipal, setValue]);
 
   const modalEntregaAtual = watch("modalEntrega");
   const bairroSelecionadoAtual = watch("bairroID");
@@ -69,7 +70,7 @@ export function CarrinhoDrawer() {
   }, [drawerAberto]);
 
   const bairroEscolhido = listaBairros.find(
-    (bairro) => bairro.id === bairroSelecionadoAtual,
+    (bairro) => bairro.id === Number(bairroSelecionadoAtual),
   );
   const subtotal = itens.reduce(
     (acc, item) => acc + calcularPrecoFinal(item.produto) * item.quantidade,
@@ -86,17 +87,23 @@ export function CarrinhoDrawer() {
       cliente: {
         nome: data.nome,
         telefone: data.telefone.replace(/\D/g, ""),
-        rua: data.rua || "",
-        numero: data.numero || "",
-        bairroID: data.bairroID,
       },
       pedido: {
         modalEntrega: data.modalEntrega,
         pagamento: data.pagamento,
         valorTotal: total,
         anotacaoGeral: data.anotacaoGeral?.trim(),
+        ruaEntrega: data.modalEntrega === "DELIVERY" ? data.rua : undefined,
+        numeroEntrega:
+          data.modalEntrega === "DELIVERY" ? data.numero : undefined,
+        nomeBairroEntrega:
+          data.modalEntrega === "DELIVERY"
+            ? bairroEscolhido?.bairro
+            : undefined,
+        valorTaxaEntrega:
+          data.modalEntrega === "DELIVERY" ? bairroEscolhido?.valor : undefined,
         itens: itens.map((item) => ({
-          produtoID: item.produto.id,
+          produtoID: Number(item.produto.id),
           nomeProduto: item.produto.descricao,
           quantidade: item.quantidade,
           precoProduto: calcularPrecoFinal(item.produto),
@@ -120,7 +127,7 @@ export function CarrinhoDrawer() {
         limparCarrinho();
         fecharDrawer();
         if (
-          typeof responseData.pedidoId === "string" &&
+          typeof responseData.pedidoId === "number" &&
           typeof responseData.tempoTotalEstimadoMinutos === "number"
         ) {
           setPedidoConfirmado({
@@ -129,7 +136,10 @@ export function CarrinhoDrawer() {
             modalEntrega: data.modalEntrega,
           });
         } else {
-          console.error("Resposta de pedido confirmado inválida:", responseData);
+          console.error(
+            "Resposta de pedido confirmado inválida:",
+            responseData,
+          );
           toast.error(
             "O pedido foi criado, mas não foi possível exibir os detalhes.",
           );
@@ -159,9 +169,7 @@ export function CarrinhoDrawer() {
             {item.produto.descricao} (x{item.quantidade})
           </span>
           <span className="text-secundaria">
-            {formatarMoeda(
-              calcularPrecoFinal(item.produto) * item.quantidade,
-            )}
+            {formatarMoeda(calcularPrecoFinal(item.produto) * item.quantidade)}
           </span>
         </>
       ) : (
@@ -183,226 +191,233 @@ export function CarrinhoDrawer() {
         position="right"
         className="w-full bg-fundo p-0 text-secundaria md:w-[450px] flex flex-col overflow-hidden"
       >
-      <DrawerHeader
-        title="MEU PEDIDO"
-        titleIcon={() => <></>}
-        className="bg-fundo p-4 text-secundaria"
-      />
-      <DrawerItems className="flex-1 overflow-y-auto bg-fundo p-4">
-        <div className="flex justify-end mb-2">
-          <Button
-            size="xs"
-            color="red"
-            outline
-            className="2 cursor-pointer"
-            onClick={() => {
-              limparCarrinho();
-              fecharDrawer();
-            }}
-          >
-            Limpar Carrinho
-          </Button>
-        </div>
+        <DrawerHeader
+          title="MEU PEDIDO"
+          titleIcon={() => <></>}
+          className="bg-fundo p-4 text-secundaria"
+        />
+        <DrawerItems className="flex-1 overflow-y-auto bg-fundo p-4">
+          <div className="flex justify-end mb-2">
+            <Button
+              size="xs"
+              color="red"
+              outline
+              className="2 cursor-pointer"
+              onClick={() => {
+                limparCarrinho();
+                fecharDrawer();
+              }}
+            >
+              Limpar Carrinho
+            </Button>
+          </div>
 
-        <div className="mb-6 space-y-3 rounded-lg bg-secundaria/5 p-4">
-          {itensPedido}
-          <div className="flex justify-between">
-            <span className="text-secundaria"></span>
-            <span className="text-secundaria"></span>
-          </div>
-          <hr className="border-secundaria/15" />
-          <div className="flex justify-between">
-            <span className="text-secundaria">Subtotal</span>
-            <span className="text-secundaria">{formatarMoeda(subtotal)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-secundaria">Entrega</span>
-            <span className="text-secundaria">{formatarMoeda(taxaEntrega)}</span>
-          </div>
-          <hr className="border-secundaria/15" />
-          <div className="flex justify-between text-lg font-bold">
-            <span className="text-secundaria">Total</span>
-            <span className="text-secundaria">{formatarMoeda(total)}</span>
-          </div>
-        </div>
-
-        <form id="form-checkout" onSubmit={handleSubmit(enviarPedido)}>
-          <div>
-            <h3 className="text-lg font-bold text-secundaria mb-3">Seus Dados</h3>
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="nome">Nome Completo *</Label>
-                <TextInput
-                  id="nome"
-                  placeholder="Ex: João Silva"
-                  readOnly={Boolean(cliente.id)}
-                  {...register("nome")}
-                />
-                {errors.nome && (
-                  <span className="text-red-500 text-sm">
-                    {errors.nome.message}
-                  </span>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="telefone">WhatsApp *</Label>
-                <TextInput
-                  id="telefone"
-                  placeholder="(53) 99999-9999"
-                  readOnly={Boolean(cliente.id)}
-                  {...register("telefone")}
-                />
-                {errors.telefone && (
-                  <span className="text-red-500 text-sm">
-                    {errors.telefone.message}
-                  </span>
-                )}
-              </div>
+          <div className="mb-6 space-y-3 rounded-lg bg-secundaria/5 p-4">
+            {itensPedido}
+            <div className="flex justify-between">
+              <span className="text-secundaria"></span>
+              <span className="text-secundaria"></span>
+            </div>
+            <hr className="border-secundaria/15" />
+            <div className="flex justify-between">
+              <span className="text-secundaria">Subtotal</span>
+              <span className="text-secundaria">{formatarMoeda(subtotal)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-secundaria">Entrega</span>
+              <span className="text-secundaria">
+                {formatarMoeda(taxaEntrega)}
+              </span>
+            </div>
+            <hr className="border-secundaria/15" />
+            <div className="flex justify-between text-lg font-bold">
+              <span className="text-secundaria">Total</span>
+              <span className="text-secundaria">{formatarMoeda(total)}</span>
             </div>
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-secundaria mb-3">
-              Como deseja receber?
-            </h3>
-            <fieldset className="flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <Radio
-                  id="delivery"
-                  value="DELIVERY"
-                  className="text-primaria focus:ring-primaria"
-                  {...register("modalEntrega")}
-                />
-                <Label htmlFor="delivery">Entrega no meu endereço</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Radio
-                  id="retirada"
-                  value="RETIRADA"
-                  className="text-primaria focus:ring-primaria"
-                  {...register("modalEntrega")}
-                />
-                <Label htmlFor="retirada">Vou buscar no balcão</Label>
-              </div>
-            </fieldset>
 
-            {modalEntregaAtual === "DELIVERY" && (
-              <div className="mt-4 space-y-3 p-4 rounded-lg">
+          <form id="form-checkout" onSubmit={handleSubmit(enviarPedido)}>
+            <div>
+              <h3 className="text-lg font-bold text-secundaria mb-3">
+                Seus Dados
+              </h3>
+              <div className="space-y-3">
                 <div>
-                  <Label htmlFor="bairro">Bairro *</Label>
-                  <Select
-                    id="bairro"
-                    className="focus:border-primaria focus:ring-primaria"
-                    {...register("bairroID")}
-                  >
-                    <option value="">Selecione seu bairro...</option>
-                    {listaBairros.map((bairro) => (
-                      <option key={bairro.id} value={bairro.id}>
-                        {bairro.bairro} - {formatarMoeda(bairro.valor)}
-                      </option>
-                    ))}
-                  </Select>
-                  {errors.bairroID && (
+                  <Label htmlFor="nome">Nome Completo *</Label>
+                  <TextInput
+                    id="nome"
+                    placeholder="Ex: João Silva"
+                    readOnly={Boolean(cliente.id)}
+                    {...register("nome")}
+                  />
+                  {errors.nome && (
                     <span className="text-red-500 text-sm">
-                      {errors.bairroID.message}
+                      {errors.nome.message}
                     </span>
                   )}
                 </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="col-span-2">
-                    <Label htmlFor="rua">Rua *</Label>
-                    <TextInput
-                      id="rua"
-                      placeholder="Nome da rua"
-                      {...register("rua")}
-                    />
-                    {errors.rua && (
-                      <span className="text-red-500 text-sm">
-                        {errors.rua.message}
-                      </span>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="numero">Nº *</Label>
-                    <TextInput
-                      id="numero"
-                      placeholder="Número"
-                      {...register("numero")}
-                    />
-                    {errors.numero && (
-                      <span className="text-red-500 text-sm">
-                        {errors.numero.message}
-                      </span>
-                    )}
-                  </div>
+
+                <div>
+                  <Label htmlFor="telefone">WhatsApp *</Label>
+                  <TextInput
+                    id="telefone"
+                    placeholder="(53) 99999-9999"
+                    readOnly={Boolean(cliente.id)}
+                    {...register("telefone")}
+                  />
+                  {errors.telefone && (
+                    <span className="text-red-500 text-sm">
+                      {errors.telefone.message}
+                    </span>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-secundaria mb-3">
-              Forma de Pagamento
-            </h3>
-            <fieldset className="flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <Radio
-                  id="maquininha"
-                  value="MAQUININHA_CARTAO"
-                  className="text-primaria focus:ring-primaria"
-                  {...register("pagamento")}
-                />
-                <Label htmlFor="maquininha">
-                  Cartão (Levamos a maquininha)
-                </Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Radio
-                  id="dinheiro"
-                  value="DINHEIRO"
-                  defaultChecked
-                  className="text-primaria focus:ring-primaria"
-                  {...register("pagamento")}
-                />
-                <Label htmlFor="dinheiro">Dinheiro</Label>
-              </div>
-            </fieldset>
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-secundaria mb-3">
-              Observações (Opcional)
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="anotacaoGeral" className="sr-only">
-                  Observações do pedido
-                </Label>
-                <TextInput
-                  id="anotacaoGeral"
-                  placeholder="Ex: Troco para R$ 100"
-                  {...register("anotacaoGeral")}
-                />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-secundaria mb-3">
+                Como deseja receber?
+              </h3>
+              <fieldset className="flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <Radio
+                    id="delivery"
+                    value="DELIVERY"
+                    className="text-primaria focus:ring-primaria"
+                    {...register("modalEntrega")}
+                  />
+                  <Label htmlFor="delivery">Entrega no meu endereço</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Radio
+                    id="retirada"
+                    value="RETIRADA"
+                    className="text-primaria focus:ring-primaria"
+                    {...register("modalEntrega")}
+                  />
+                  <Label htmlFor="retirada">Vou buscar no balcão</Label>
+                </div>
+              </fieldset>
+
+              {modalEntregaAtual === "DELIVERY" && (
+                <div className="mt-4 space-y-3 p-4 rounded-lg">
+                  <div>
+                    <Label htmlFor="bairro">Bairro *</Label>
+                    <Select
+                      id="bairro"
+                      className="focus:border-primaria focus:ring-primaria"
+                      {...register("bairroID", {
+                        setValueAs: (value) =>
+                          value === "" ? undefined : Number(value),
+                      })}
+                    >
+                      <option value="">Selecione seu bairro...</option>
+                      {listaBairros.map((bairro) => (
+                        <option key={bairro.id} value={bairro.id}>
+                          {bairro.bairro} - {formatarMoeda(bairro.valor)}
+                        </option>
+                      ))}
+                    </Select>
+                    {errors.bairroID && (
+                      <span className="text-red-500 text-sm">
+                        {errors.bairroID.message}
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="col-span-2">
+                      <Label htmlFor="rua">Rua *</Label>
+                      <TextInput
+                        id="rua"
+                        placeholder="Nome da rua"
+                        {...register("rua")}
+                      />
+                      {errors.rua && (
+                        <span className="text-red-500 text-sm">
+                          {errors.rua.message}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="numero">Nº *</Label>
+                      <TextInput
+                        id="numero"
+                        placeholder="Número"
+                        {...register("numero")}
+                      />
+                      {errors.numero && (
+                        <span className="text-red-500 text-sm">
+                          {errors.numero.message}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-secundaria mb-3">
+                Forma de Pagamento
+              </h3>
+              <fieldset className="flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                  <Radio
+                    id="maquininha"
+                    value="MAQUININHA_CARTAO"
+                    className="text-primaria focus:ring-primaria"
+                    {...register("pagamento")}
+                  />
+                  <Label htmlFor="maquininha">
+                    Cartão (Levamos a maquininha)
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Radio
+                    id="dinheiro"
+                    value="DINHEIRO"
+                    defaultChecked
+                    className="text-primaria focus:ring-primaria"
+                    {...register("pagamento")}
+                  />
+                  <Label htmlFor="dinheiro">Dinheiro</Label>
+                </div>
+              </fieldset>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-secundaria mb-3">
+                Observações (Opcional)
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="anotacaoGeral" className="sr-only">
+                    Observações do pedido
+                  </Label>
+                  <TextInput
+                    id="anotacaoGeral"
+                    placeholder="Ex: Troco para R$ 100"
+                    {...register("anotacaoGeral")}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        </form>
-      </DrawerItems>
+          </form>
+        </DrawerItems>
 
-      {/* Footer Fixo */}
-      <div className="flex gap-3 border-t border-secundaria/10 bg-fundo p-4">
-        <Button
-          onClick={fecharDrawer}
-          className="flex-1 cursor-pointer border border-secundaria/20 bg-fundo text-secundaria hover:bg-secundaria/5 focus:ring-primaria"
-        >
-          Continuar Comprando
-        </Button>
-        <Button
-          type="submit"
-          form="form-checkout"
-          className="flex-1 cursor-pointer bg-primaria font-bold text-white hover:bg-secundaria focus:ring-primaria"
-        >
-          Confirmar Pedido
-        </Button>
-      </div>
+        {/* Footer Fixo */}
+        <div className="flex gap-3 border-t border-secundaria/10 bg-fundo p-4">
+          <Button
+            onClick={fecharDrawer}
+            className="flex-1 cursor-pointer border border-secundaria/20 bg-fundo text-secundaria hover:bg-secundaria/5 focus:ring-primaria"
+          >
+            Continuar Comprando
+          </Button>
+          <Button
+            type="submit"
+            form="form-checkout"
+            className="flex-1 cursor-pointer bg-primaria font-bold text-white hover:bg-secundaria focus:ring-primaria"
+          >
+            Confirmar Pedido
+          </Button>
+        </div>
       </Drawer>
       {pedidoConfirmado && (
         <PedidoConfirmadoModal
