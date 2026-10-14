@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useClienteStore } from "./context/ClienteContext";
 import ModalDetalhes from "./ModalDetalhes";
 import { CarrinhoDrawer } from "./components/CarrinhoDrawer";
+import { toast } from "sonner";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -60,6 +61,7 @@ export default function App() {
         setProdutos(validarListaProdutos(dados));
       } catch (error) {
         console.error("Erro ao carregar os produtos:", error);
+        toast.error("Não foi possível carregar o cardápio. Tente novamente.");
       } finally {
         finalizarBuscaProdutos();
       }
