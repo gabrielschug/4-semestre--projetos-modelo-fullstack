@@ -20,13 +20,14 @@ export class PedidoRepository {
         pagamento: true,
         valorTotal: true,
         anotacaoCliente: true,
+        ruaEntrega: true,
+        numeroEntrega: true,
+        nomeBairroEntrega: true,
+        valorTaxaEntrega: true,
         cliente: {
           select: {
             nome: true,
             telefone: true,
-            rua: true,
-            numero: true,
-            bairro: { select: { bairro: true } },
           },
         },
         itens: {
@@ -41,7 +42,7 @@ export class PedidoRepository {
     });
   }
 
-  async buscarStatusPedido(id: string) {
+  async buscarStatusPedido(id: number) {
     return await this.prisma.pedido.findUnique({
       where: { id },
       select: { status: true, modalEntrega: true },
@@ -49,7 +50,7 @@ export class PedidoRepository {
   }
 
   async atualizarStatusPedido(
-    id: string,
+    id: number,
     statusAtual: StatusPedido,
     novoStatus: StatusPedido,
   ) {
@@ -121,7 +122,7 @@ export class PedidoRepository {
     });
   }
 
-  async cancelarPedido(clienteID: string, pedidoID: string) {
+  async cancelarPedido(clienteID: string, pedidoID: number) {
     const pedido = await this.prisma.pedido.findFirst({
       where: { id: pedidoID, clienteID },
       select: { status: true },
@@ -145,7 +146,9 @@ export class PedidoRepository {
         select: { id: true },
       });
       return {
-        resultado: pedidoAtual ? ("NAO_CANCELAVEL" as const) : ("NAO_ENCONTRADO" as const),
+        resultado: pedidoAtual
+          ? ("NAO_CANCELAVEL" as const)
+          : ("NAO_ENCONTRADO" as const),
       };
     }
 
@@ -154,8 +157,8 @@ export class PedidoRepository {
 
   async avaliarItemPedido(
     clienteID: string,
-    pedidoID: string,
-    itemID: string,
+    pedidoID: number,
+    itemID: number,
     avaliacao: number,
   ) {
     const pedido = await this.prisma.pedido.findFirst({
@@ -194,9 +197,9 @@ export class PedidoRepository {
   }
 
   private async calcularTempoEstimado(
-    produtoIds: string[],
+    produtoIds: number[],
     modalEntrega: string,
-    bairroID?: string,
+    nomeBairroEntrega?: string,
   ): Promise<number> {
     const produtos = await this.prisma.produto.findMany({
       where: { id: { in: produtoIds } },
@@ -209,15 +212,15 @@ export class PedidoRepository {
         : 0;
 
     let tempoEntrega = 0;
-    if (modalEntrega === "DELIVERY" && bairroID) {
+    if (modalEntrega === "DELIVERY" && nomeBairroEntrega) {
       const bairro = await this.prisma.valorEntrega.findUnique({
-        where: { id: bairroID },
+        where: { bairro: nomeBairroEntrega },
         select: { tempoEntregaMinutos: true },
       });
-
-      if (bairro) {
-        tempoEntrega = bairro.tempoEntregaMinutos || 0;
+      if (bairro === null) {
+        throw new Error(`Bairro ${nomeBairroEntrega} não cadastrado.`);
       }
+      tempoEntrega = bairro.tempoEntregaMinutos || 0;
     }
     return maxTempoPreparo + tempoEntrega;
   }
@@ -231,9 +234,6 @@ export class PedidoRepository {
         data: {
           nome: dados.cliente.nome,
           telefone: dados.cliente.telefone,
-          rua: dados.cliente.rua,
-          numero: dados.cliente.numero,
-          bairroID: dados.cliente.bairroID,
           senha: Math.random().toString(36).slice(-10),
         },
       });
@@ -244,7 +244,7 @@ export class PedidoRepository {
     const tempoTotalEstimadoMinutos = await this.calcularTempoEstimado(
       produtoIds,
       dados.pedido.modalEntrega,
-      dados.cliente.bairroID,
+      dados.pedido.nomeBairroEntrega,
     );
 
     // Pedido Logado
@@ -255,6 +255,10 @@ export class PedidoRepository {
         valorTotal: dados.pedido.valorTotal,
         tempoTotalEstimadoMinutos: tempoTotalEstimadoMinutos,
         anotacaoCliente: anotacaoFinal,
+        ruaEntrega: dados.pedido.ruaEntrega,
+        numeroEntrega: dados.pedido.numeroEntrega,
+        nomeBairroEntrega: dados.pedido.nomeBairroEntrega,
+        valorTaxaEntrega: dados.pedido.valorTaxaEntrega,
         clienteID: cliente.id,
         itens: {
           create: dados.pedido.itens.map((item) => ({

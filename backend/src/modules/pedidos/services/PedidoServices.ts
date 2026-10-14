@@ -87,7 +87,7 @@ export class PedidoService {
     return await this.pedidoRepository.contarPedidosPorStatus();
   }
 
-  async atualizarStatusPedido(id: string, novoStatus: StatusPedido) {
+  async atualizarStatusPedido(id: number, novoStatus: StatusPedido) {
     const pedido = await this.pedidoRepository.buscarStatusPedido(id);
     if (!pedido) {
       return { resultado: "NAO_ENCONTRADO" as const };
@@ -113,14 +113,14 @@ export class PedidoService {
     return await this.pedidoRepository.listarPedidosDoCliente(clienteID);
   }
 
-  async cancelarPedido(clienteID: string, pedidoID: string) {
+  async cancelarPedido(clienteID: string, pedidoID: number) {
     return await this.pedidoRepository.cancelarPedido(clienteID, pedidoID);
   }
 
   async avaliarItemPedido(
     clienteID: string,
-    pedidoID: string,
-    itemID: string,
+    pedidoID: number,
+    itemID: number,
     avaliacao: number,
   ) {
     return await this.pedidoRepository.avaliarItemPedido(

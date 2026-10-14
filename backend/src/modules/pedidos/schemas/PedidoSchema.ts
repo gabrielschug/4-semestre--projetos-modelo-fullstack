@@ -6,9 +6,6 @@ export const criarPedidoSchema = z.object({
       .string()
       .min(5, "O nome e sobrenome precisa ter pelo menos 5 caracteres"),
     telefone: z.string().max(12).min(10, "Telefone inválido"),
-    rua: z.string().min(1, "A rua é obrigatória"),
-    numero: z.string().min(1, "O número é obrigatório"),
-    bairroID: z.string().guid("ID do bairro inválido"),
   }),
   pedido: z.object({
     modalEntrega: z.enum(["DELIVERY", "RETIRADA"], {
@@ -19,10 +16,14 @@ export const criarPedidoSchema = z.object({
     }),
     valorTotal: z.number().positive("O valor total deve ser positivo"),
     anotacaoGeral: z.string().optional(),
+    ruaEntrega: z.string().optional(),
+    numeroEntrega: z.string().optional(),
+    valorTaxaEntrega: z.number().gte(0).optional(),
+    nomeBairroEntrega: z.string().optional(),
     itens: z
       .array(
         z.object({
-          produtoID: z.string().guid("ID do produto inválido"),
+          produtoID: z.number().int().positive("ID do produto inválido"),
           nomeProduto: z.string(),
           quantidade: z
             .number()

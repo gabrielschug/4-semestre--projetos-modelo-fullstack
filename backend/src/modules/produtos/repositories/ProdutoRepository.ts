@@ -41,7 +41,7 @@ export class ProdutoRepository {
     });
   }
 
-  async atualizar(id: string, dados: AtualizarProdutoInput) {
+  async atualizar(id: number, dados: AtualizarProdutoInput) {
     const produto = await this.prisma.produto.findUnique({ where: { id } });
     if (!produto) {
       return null;
@@ -59,7 +59,7 @@ export class ProdutoRepository {
     });
   }
 
-  async excluir(id: string) {
+  async excluir(id: number) {
     const produto = await this.prisma.produto.findUnique({
       where: { id },
       select: { id: true },
@@ -79,9 +79,9 @@ export class ProdutoRepository {
     return "EXCLUIDO" as const;
   }
 
-  async PesquisarProdutoPorId(id: string) {
+  async PesquisarProdutoPorId(id: number) {
     return await this.prisma.produto.findFirst({
-      where: { id: id, disponibilidade: true },
+      where: { id, disponibilidade: true },
     });
   }
 
