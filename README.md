@@ -35,6 +35,7 @@ A aplicação foi pensada como um sistema de e-commerce gastronômico, com duas 
 - JWT para autenticação
 - Bcrypt para hash de senhas
 - Zod para validação de entrada
+- Swagger / OpenAPI para documentação interativa da API
 
 ## Objetivos acadêmicos
 
@@ -73,6 +74,16 @@ Este projeto foi desenvolvido com foco em aprender e aplicar os conceitos vistos
 - cadastro e gerenciamento de produtos
 - gestão de bairros e valores de entrega
 - controle de tempo estimado de entrega e preparo
+
+## Documentação da API
+
+A API conta com documentação interativa criada com Swagger UI, que apresenta as rotas disponíveis e permite consultar e testar as operações. As rotas administrativas protegidas também podem ser testadas informando um token de acesso.
+
+Com o backend em execução, acesse a documentação em:
+
+```text
+http://localhost:3000/docs
+```
 
 ## Estrutura do projeto
 
@@ -220,6 +231,12 @@ O backend ficará disponível em:
 
 ```text
 http://localhost:3000
+```
+
+A documentação interativa da API, disponibilizada pelo Swagger UI, pode ser acessada enquanto o backend estiver em execução:
+
+```text
+http://localhost:3000/docs
 ```
 
 ### 3. Configurar o frontend
