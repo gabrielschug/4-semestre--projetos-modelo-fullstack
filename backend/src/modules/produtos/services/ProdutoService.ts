@@ -25,11 +25,23 @@ export class ProdutoService {
     return await this.produtoRepository.pesquisarPorCategoria(categoria);
   }
 
-  async atualizar(id: number, dados: AtualizarProdutoInput) {
-    return await this.produtoRepository.atualizar(id, dados);
+  async atualizar(
+    id: number,
+    dados: AtualizarProdutoInput,
+    urlFoto: string | undefined,
+  ) {
+    const dadosParaAtualizar = {
+      ...dados,
+      fotoUrl: urlFoto,
+    };
+    return await this.produtoRepository.atualizar(id, dadosParaAtualizar);
   }
 
-  async criar(dados: CriarProdutoInput, adminID: string) {
+  async criar(
+    dados: CriarProdutoInput,
+    adminID: string,
+    urlFoto: string | undefined,
+  ) {
     let fraseVenda = dados.fraseVenda || null;
 
     // Sem frase informada, tenta gerar com a IA; se falhar, cadastra sem ela
@@ -41,8 +53,12 @@ export class ProdutoService {
       }
     }
 
+    if (!urlFoto) {
+      dados.disponibilidade = false;
+    }
+
     return await this.produtoRepository.criar(
-      { ...dados, fraseVenda },
+      { ...dados, fraseVenda, fotoUrl: urlFoto },
       adminID,
     );
   }

@@ -26,8 +26,11 @@ produtoRouter.post("/", autenticarAdmin, upload.single("fotoUrl"), (req, res) =>
 produtoRouter.post("/gerar-frase", autenticarAdmin, (req, res) =>
   controller.gerarFraseVenda(req, res),
 );
-produtoRouter.put("/:id", autenticarAdmin, (req, res) =>
-  controller.atualizar(req, res),
+produtoRouter.put(
+  "/:id",
+  autenticarAdmin,
+  upload.single("fotoUrl"),
+  (req, res) => controller.atualizar(req, res),
 );
 produtoRouter.delete("/:id", autenticarAdmin, (req, res) =>
   controller.excluir(req, res),
