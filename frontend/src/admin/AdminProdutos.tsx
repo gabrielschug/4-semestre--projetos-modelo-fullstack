@@ -43,7 +43,9 @@ export default function AdminProdutos() {
         });
 
         if (!response.ok) {
-          throw new Error(`Falha ao carregar produtos (HTTP ${response.status})`);
+          throw new Error(
+            `Falha ao carregar produtos (HTTP ${response.status})`,
+          );
         }
 
         const dados: ProdutoType[] = await response.json();
@@ -68,29 +70,57 @@ export default function AdminProdutos() {
 
   async function salvarProduto(
     id: number | null,
-    dados: ProdutoEdicaoType,
+    dados: ProdutoEdicaoType & { arquivoFoto?: File | null },
   ): Promise<ProdutoType> {
     const tokenAdmin = token || localStorage.getItem("adminToken");
     if (!tokenAdmin) {
       throw new Error("Sessão administrativa não encontrada. Entre novamente.");
     }
 
+    const formData = new FormData();
+    formData.append("descricao", dados.descricao);
+    formData.append("categoria", dados.categoria);
+    formData.append("precoBase", dados.precoBase.toString());
+    formData.append("disponibilidade", String(dados.disponibilidade));
+
+    formData.append(
+      "valorDesconto",
+      dados.valorDesconto !== null ? String(dados.valorDesconto) : "",
+    );
+    formData.append(
+      "especificacoes",
+      dados.especificacoes !== null ? dados.especificacoes : "",
+    );
+    formData.append(
+      "tempoPreparoMinutos",
+      dados.tempoPreparoMinutos !== null
+        ? String(dados.tempoPreparoMinutos)
+        : "",
+    );
+
+    formData.append("fraseVenda", dados.fraseVenda ?? "");
+    if (dados.arquivoFoto) {
+      formData.append("fotoUrl", dados.arquivoFoto);
+    }
+
     const response = await fetch(
-      id ? `${apiUrl}/produtos/${encodeURIComponent(id)}` : `${apiUrl}/produtos`,
+      id
+        ? `${apiUrl}/produtos/${encodeURIComponent(id)}`
+        : `${apiUrl}/produtos`,
       {
-      method: id ? "PUT" : "POST",
-      headers: {
-        Authorization: `Bearer ${tokenAdmin}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(dados),
+        method: id ? "PUT" : "POST",
+        headers: {
+          Authorization: `Bearer ${tokenAdmin}`,
+        },
+        body: formData,
       },
     );
     const resultado = await response.json();
 
     if (!response.ok) {
       throw new Error(
-        resultado.error ?? `Não foi possível atualizar o produto (HTTP ${response.status}).`,
+        resultado.error ??
+          `Não foi possível atualizar o produto (HTTP ${response.status}).`,
       );
     }
 
@@ -109,7 +139,10 @@ export default function AdminProdutos() {
   }
 
   async function gerarFraseVenda(
-    dados: Pick<ProdutoEdicaoType, "descricao" | "categoria" | "especificacoes">,
+    dados: Pick<
+      ProdutoEdicaoType,
+      "descricao" | "categoria" | "especificacoes"
+    >,
   ): Promise<string> {
     const tokenAdmin = token || localStorage.getItem("adminToken");
     if (!tokenAdmin) {
@@ -162,7 +195,7 @@ export default function AdminProdutos() {
   }
 
   return (
-    <section className="mx-auto w-full max-w-6xl space-y-8">
+    <section className="mx-auto w-full space-y-8">
       <header className="space-y-2">
         <p className="text-sm font-semibold uppercase tracking-wider text-orange-700">
           Administração
@@ -187,7 +220,8 @@ export default function AdminProdutos() {
           </Button>
         </div>
       </header>
-      <div className="overflow-x-auto">
+
+      <div className="overflow-x-auto min-h-0 min-w-0">
         <Table striped>
           <TableHead>
             <TableHeadCell>ID</TableHeadCell>
@@ -198,7 +232,7 @@ export default function AdminProdutos() {
             <TableHeadCell>Disponibilidade</TableHeadCell>
             <TableHeadCell>Especificações</TableHeadCell>
             <TableHeadCell>Frase de venda (IA)</TableHeadCell>
-            <TableHeadCell>URL da foto</TableHeadCell>
+            <TableHeadCell>Imagem</TableHeadCell>
             <TableHeadCell>Preparo (min)</TableHeadCell>
             <TableHeadCell>Ações</TableHeadCell>
           </TableHead>

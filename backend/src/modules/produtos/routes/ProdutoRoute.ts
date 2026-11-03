@@ -4,6 +4,7 @@ import { ProdutoService } from "../services/ProdutoService";
 import { ProdutoRepository } from "../repositories/ProdutoRepository";
 import { prisma } from "../../../lib/prisma";
 import { autenticarAdmin } from "../../../middlewares/autenticarAdmin";
+import { upload } from "../../../middlewares/uploadFoto";
 
 const produtoRouter = Router();
 
@@ -19,14 +20,17 @@ produtoRouter.get("/destaques", (_req, res) => controller.listarDestaques(res));
 produtoRouter.get("/categoria/:categoria", (req, res) =>
   controller.pesquisarPorCategoria(req, res),
 );
-produtoRouter.post("/", autenticarAdmin, (req, res) =>
+produtoRouter.post("/", autenticarAdmin, upload.single("fotoUrl"), (req, res) =>
   controller.criar(req, res),
 );
 produtoRouter.post("/gerar-frase", autenticarAdmin, (req, res) =>
   controller.gerarFraseVenda(req, res),
 );
-produtoRouter.put("/:id", autenticarAdmin, (req, res) =>
-  controller.atualizar(req, res),
+produtoRouter.put(
+  "/:id",
+  autenticarAdmin,
+  upload.single("fotoUrl"),
+  (req, res) => controller.atualizar(req, res),
 );
 produtoRouter.delete("/:id", autenticarAdmin, (req, res) =>
   controller.excluir(req, res),

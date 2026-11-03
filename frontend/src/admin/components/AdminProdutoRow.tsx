@@ -8,12 +8,15 @@ type AdminProdutoRowProps = {
   isNew?: boolean;
   onSave: (
     id: number | null,
-    dados: ProdutoEdicaoType,
+    dados: ProdutoEdicaoType & { arquivoFoto?: File | null },
   ) => Promise<ProdutoType>;
   onDelete?: (id: number) => Promise<void>;
   onCancel?: () => void;
   onGerarFrase: (
-    dados: Pick<ProdutoEdicaoType, "descricao" | "categoria" | "especificacoes">,
+    dados: Pick<
+      ProdutoEdicaoType,
+      "descricao" | "categoria" | "especificacoes"
+    >,
   ) => Promise<string>;
 };
 
@@ -38,6 +41,8 @@ export default function AdminProdutoRow({
   const [salvando, setSalvando] = useState(false);
   const [gerandoFrase, setGerandoFrase] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  const [arquivoFoto, setArquivoFoto] = useState<File | null>(null);
+
   const [rascunho, setRascunho] = useState<ProdutoEdicaoType>(() =>
     criarRascunho(produto),
   );
@@ -60,13 +65,14 @@ export default function AdminProdutoRow({
     setRascunho(criarRascunho(produto));
     setErro(null);
     setEditando(true);
+    setArquivoFoto(null);
   }
 
   async function salvar() {
     setSalvando(true);
     setErro(null);
     try {
-      await onSave(isNew ? null : produto.id, rascunho);
+      await onSave(isNew ? null : produto.id, { ...rascunho, arquivoFoto });
       setEditando(false);
     } catch (error) {
       setErro(
@@ -260,17 +266,12 @@ export default function AdminProdutoRow({
         </TableCell>
         <TableCell className="w-40 max-w-40 overflow-hidden">
           <input
-            aria-label="URL da foto"
+            aria-label="Imagem"
             className={`${inputClassName} truncate`}
-            type="url"
+            type="file"
+            accept="image/jpeg,image/png"
             title={rascunho.fotoUrl ?? ""}
-            value={rascunho.fotoUrl ?? ""}
-            onChange={(event) =>
-              setRascunho({
-                ...rascunho,
-                fotoUrl: event.target.value === "" ? null : event.target.value,
-              })
-            }
+            onChange={(e) => setArquivoFoto(e.target.files?.[0] || null)}
           />
         </TableCell>
         <TableCell>
@@ -309,6 +310,7 @@ export default function AdminProdutoRow({
                 } else {
                   setEditando(false);
                   setErro(null);
+                  setArquivoFoto(null);
                 }
               }}
               disabled={salvando}
@@ -356,7 +358,7 @@ export default function AdminProdutoRow({
       </TableCell>
       <TableCell>{produto.categoria}</TableCell>
       <TableCell>{formatarMoeda(produto.precoBase)}</TableCell>
-      <TableCell>{produto.valorDesconto ?? "—"}</TableCell>
+      <TableCell>{formatarMoeda(produto.valorDesconto ?? 0)}</TableCell>
       <TableCell>
         <span
           className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
@@ -392,7 +394,13 @@ export default function AdminProdutoRow({
           {produto.fotoUrl ?? "—"}
         </span>
       </TableCell>
-      <TableCell>{produto.tempoPreparoMinutos ?? "—"}</TableCell>
+      <TableCell>
+        <span className="flex justify-center">
+          {produto.tempoPreparoMinutos != null
+            ? `${produto.tempoPreparoMinutos} min`
+            : "—"}
+        </span>
+      </TableCell>
       <TableCell>
         <div className="flex min-w-28 flex-col gap-2">
           <Button size="xs" color="light" onClick={iniciarEdicao}>

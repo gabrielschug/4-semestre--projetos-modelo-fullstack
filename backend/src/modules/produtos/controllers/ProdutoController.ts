@@ -7,6 +7,7 @@ import {
   termoPesquisaSchema,
 } from "../schemas/ProdutoSchema";
 import { ProdutoService } from "../services/ProdutoService";
+import { uploadParaCloudinary } from "../../../lib/cloudinary";
 
 export class ProdutoController {
   constructor(private readonly service: ProdutoService) {}
@@ -85,7 +86,15 @@ export class ProdutoController {
     }
 
     try {
-      const produto = await this.service.criar(dados.data, req.adminId);
+      const urlFoto = req.file
+        ? await uploadParaCloudinary(req.file.buffer)
+        : undefined;
+
+      const produto = await this.service.criar(
+        dados.data,
+        req.adminId,
+        urlFoto,
+      );
       return res.status(201).json(produto);
     } catch (error) {
       console.error("Erro ao criar produto:", error);
@@ -140,7 +149,15 @@ export class ProdutoController {
     }
 
     try {
-      const produto = await this.service.atualizar(id.data, dados.data);
+      const urlFoto = req.file
+        ? await uploadParaCloudinary(req.file.buffer)
+        : undefined;
+
+      const produto = await this.service.atualizar(
+        id.data,
+        dados.data,
+        urlFoto,
+      );
       if (!produto) {
         return res.status(404).json({ error: "Produto não encontrado" });
       }
