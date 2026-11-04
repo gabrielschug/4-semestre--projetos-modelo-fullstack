@@ -13,6 +13,9 @@ import type { PedidoAdmin, StatusPedido } from "../utils/AdminPedidoType";
 import { linkWhatsapp, mensagemDoCard } from "../utils/mensagemWhatsapp";
 import AdminPedidoCancelar from "./AdminPedidoCancelar";
 
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
 type AdminPedidoCardProps = {
   pedido: PedidoAdmin;
   atualizando: boolean;
@@ -81,8 +84,29 @@ export default function AdminPedidoCard({
       ? null
       : mensagemDoCard(pedido);
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: pedido.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  };
+
   return (
-    <article className="space-y-2 rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
+    <article
+    ref={setNodeRef}
+    style={style}
+    {...attributes}
+    {...listeners}
+    className={`space-y-2 rounded-lg border border-gray-200 bg-white p-3 shadow-sm ${isDragging ? "ring-2 ring-orange-500 shadow-xl z-50 cursor-grabbing" : "cursor-grab"}`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-xs font-bold text-gray-900">
