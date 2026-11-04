@@ -32,9 +32,14 @@ A aplicação foi pensada como um sistema de e-commerce gastronômico, com duas 
 - TypeScript
 - Prisma ORM
 - PostgreSQL
+- Multer para receber imagens de produtos
+- Cloudinary para armazenar imagens de produtos
 - JWT para autenticação
 - Bcrypt para hash de senhas
 - Zod para validação de entrada
+
+### Bibliotecas de interface
+- dnd-kit para a funcionalidade de arrastar e soltar no Kanban administrativo
 
 ## Objetivos acadêmicos
 
@@ -69,10 +74,14 @@ Este projeto foi desenvolvido com foco em aprender e aplicar os conceitos vistos
 - login administrativo
 - painel com resumo dos pedidos por status
 - quadro Kanban para controlar a produção e entrega
+- movimentação de pedidos entre as etapas do Kanban por drag and drop, com atualização do status no backend
 - atualização de status do pedido
-- cadastro e gerenciamento de produtos
+- cadastro e gerenciamento de produtos com envio de imagens
 - gestão de bairros e valores de entrega
 - controle de tempo estimado de entrega e preparo
+
+### Imagens dos produtos
+As imagens são enviadas como arquivos JPEG ou PNG de até 5 MB. O backend recebe o arquivo com Multer e o envia para o Cloudinary; a URL segura retornada é armazenada junto aos dados do produto. O envio é usado no cadastro e na edição de produtos, pelo campo `fotoUrl`.
 
 ## Estrutura do projeto
 
@@ -180,7 +189,7 @@ No Windows PowerShell:
 Copy-Item .env.example .env
 ```
 
-O arquivo `.env.example` lista as variáveis necessárias, incluindo `DATABASE_URL`, `JWT_SECRET` e `PORT`. Configure a conexão e uma chave secreta forte antes de iniciar o servidor. `GEMINI_API_KEY` é opcional e só é necessária para gerar frases de venda com Gemini.
+O arquivo `.env.example` lista as variáveis necessárias, incluindo `DATABASE_URL`, `JWT_SECRET` e `PORT`. Configure a conexão e uma chave secreta forte antes de iniciar o servidor. Para enviar imagens de produtos, configure também as credenciais da sua conta Cloudinary. `GEMINI_API_KEY` é opcional e só é necessária para gerar frases de venda com Gemini.
 
 As variáveis principais são:
 
@@ -188,6 +197,9 @@ As variáveis principais são:
 DATABASE_URL="postgresql://USUARIO:SENHA@localhost:5432/NOME_DO_BANCO?schema=public"
 JWT_SECRET="sua_chave_secreta_super_segura"
 PORT=3000
+CLOUDINARY_CLOUD_NAME="seu_cloud_name"
+CLOUDINARY_API_KEY="sua_api_key"
+CLOUDINARY_API_SECRET="sua_api_secret"
 ```
 
 Exemplo:
