@@ -50,10 +50,26 @@ export default function AdminKanban() {
     if (!over) {
       return;
     }
-    const pedidoId = active.id as string;
-    const novoStatus = over.id as StatusPedido;
-    const pedido = pedidos.find((p) => p.id === pedidoId);
-    if (!pedido) return;
+    const pedido = pedidos.find(
+      (pedido) => pedido.id === active.id,
+    );
+    if (!pedido) {
+      return;
+    }
+
+    const colunaDestino = colunas.find(
+      (coluna) => coluna.status === over.id,
+    );
+    const pedidoDestino =
+      typeof over.id === "number"
+        ? pedidos.find((pedido) => pedido.id === over.id)
+        : undefined;
+    const novoStatus: StatusPedido | undefined =
+      colunaDestino?.status ?? pedidoDestino?.status;
+    if (!novoStatus || pedido.status === novoStatus) {
+      return;
+    }
+
     alterarStatus(pedido, novoStatus);
   };
 
