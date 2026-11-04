@@ -37,11 +37,7 @@ A aplicação foi pensada como um sistema de e-commerce gastronômico, com duas 
 - JWT para autenticação
 - Bcrypt para hash de senhas
 - Zod para validação de entrada
-- Stripe (`stripe`) para cobrança online com Pix e cartão
 
-### Bibliotecas de interface
-- dnd-kit para a funcionalidade de arrastar e soltar no Kanban administrativo
-- Stripe.js (`@stripe/stripe-js` e `@stripe/react-stripe-js`) para o formulário de pagamento (Pix e cartão) no carrinho
 
 ## Objetivos acadêmicos
 
@@ -83,20 +79,7 @@ Este projeto foi desenvolvido com foco em aprender e aplicar os conceitos vistos
 - gestão de bairros e valores de entrega
 - controle de tempo estimado de entrega e preparo
 
-### Imagens dos produtos
-As imagens são enviadas como arquivos JPEG ou PNG de até 5 MB. O backend recebe o arquivo com Multer e o envia para o Cloudinary; a URL segura retornada é armazenada junto aos dados do produto. O envio é usado no cadastro e na edição de produtos, pelo campo `fotoUrl`.
 
-### Pagamento online (Stripe)
-No carrinho, a opção "Pagar online agora (Pix ou cartão de crédito/débito)" abre o formulário do Stripe (Payment Element) dentro do próprio drawer. O fluxo é:
-
-1. O frontend envia o pedido com `pagamento: "ONLINE"`. O backend confere preços e taxa de entrega com o banco, cria o pedido e um PaymentIntent no Stripe (aceitando `card` e `pix`), e devolve o `clientSecret`.
-2. O cliente escolhe Pix ou cartão no Payment Element. Os dados vão direto para o Stripe, sem passar pelo backend.
-   - **Cartão (crédito ou débito):** a aprovação acontece na hora, inclusive a etapa 3D Secure.
-   - **Pix:** o drawer mostra o QR Code e o código Pix Copia e Cola, e consulta o Stripe a cada 3 segundos até o pagamento ser aprovado. O QR Code vale 30 minutos (`VALIDADE_PIX_SEGUNDOS` em `PagamentoService.ts`).
-3. Com o pagamento aprovado, o frontend chama `POST /pagamentos/pedidos/:pedidoId/confirmar`. O backend consulta o Stripe e grava `pagoEm` no pedido. Se o Stripe redirecionar o cliente, a página inicial recebe `?pedido=ID&redirect_status=...` e conclui a confirmação.
-4. O webhook `POST /pagamentos/webhook` também grava `pagoEm`, caso o cliente feche a página antes da confirmação.
-
-Pedidos online só aparecem no Kanban, no dashboard e em "Meus pedidos" depois que o pagamento é confirmado. No Kanban eles levam a etiqueta "Pago online".
 
 ## Estrutura do projeto
 
@@ -249,27 +232,6 @@ O backend ficará disponível em:
 http://localhost:3000
 ```
 
-#### Pagamento online com Stripe (opcional)
-
-Sem as chaves do Stripe o sistema funciona normalmente, mas a opção "Pagar online" não aparece no carrinho. Para ativar:
-
-1. Crie uma conta em [stripe.com](https://stripe.com) com o Brasil como país da conta e, no modo de teste, copie as chaves em *Developers → API keys*.
-2. Ative o **Pix** em [Settings → Payment methods](https://dashboard.stripe.com/settings/payment_methods), no modo de teste e também no modo de produção. Cartões já vêm ativados.
-3. No `backend/.env`, preencha `STRIPE_SECRET_KEY` com a chave secreta (`sk_test_...`).
-4. No `frontend/.env`, preencha `VITE_STRIPE_PUBLISHABLE_KEY` com a chave publicável (`pk_test_...`).
-
-Para testar no modo de teste:
-
-- **Cartão:** `4242 4242 4242 4242`, qualquer data futura e qualquer CVC. O cartão `4000 0025 0000 3155` simula a autenticação 3D Secure.
-- **Pix:** escolha Pix e use o CPF `000.000.000-00`. Para controlar o resultado, use o e-mail: `succeed_immediately@teste.com` paga na hora, `qualquer@teste.com` paga em cerca de 3 minutos e `expire_immediately@teste.com` expira na hora. O botão **Simular digitalização** também permite aprovar ou expirar o Pix.
-
-O webhook é recomendado, principalmente para o Pix, que é pago fora da página. Com a [Stripe CLI](https://docs.stripe.com/stripe-cli) instalada, rode:
-
-```bash
-stripe listen --forward-to localhost:3000/pagamentos/webhook
-```
-
-Copie o segredo `whsec_...` exibido para `STRIPE_WEBHOOK_SECRET` no `backend/.env`. Em produção, cadastre o endpoint `https://SEU_BACKEND/pagamentos/webhook` no painel do Stripe com o evento `payment_intent.succeeded`.
 
 ### 3. Configurar o frontend
 
