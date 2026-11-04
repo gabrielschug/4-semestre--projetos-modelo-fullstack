@@ -6,6 +6,16 @@ import AdminKanbanColuna, {
 } from "./components/AdminKanbanColuna";
 import type { PedidoAdmin, StatusPedido } from "./utils/AdminPedidoType";
 import { linkWhatsapp, mensagemMudancaStatus } from "./utils/mensagemWhatsapp";
+import {
+  DndContext,
+  type DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCorners,
+} from "@dnd-kit/core";
+
+
 
 const apiUrl = import.meta.env.VITE_API_URL;
 const intervaloAtualizacaoMs = 60_000;
@@ -26,6 +36,42 @@ export default function AdminKanban() {
   const [erro, setErro] = useState<string | null>(null);
   const [pesquisa, setPesquisa] = useState("");
   const [tentativa, setTentativa] = useState(0);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) {
+      return;
+    }
+    const pedido = pedidos.find(
+      (pedido) => pedido.id === active.id,
+    );
+    if (!pedido) {
+      return;
+    }
+
+    const colunaDestino = colunas.find(
+      (coluna) => coluna.status === over.id,
+    );
+    const pedidoDestino =
+      typeof over.id === "number"
+        ? pedidos.find((pedido) => pedido.id === over.id)
+        : undefined;
+    const novoStatus: StatusPedido | undefined =
+      colunaDestino?.status ?? pedidoDestino?.status;
+    if (!novoStatus || pedido.status === novoStatus) {
+      return;
+    }
+
+    alterarStatus(pedido, novoStatus);
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -245,20 +291,26 @@ export default function AdminKanban() {
           aria-label="Quadro de pedidos. Deslize horizontalmente para ver todas as etapas."
           tabIndex={0}
         >
-          <div className="flex h-full min-h-0 w-max items-stretch gap-3 pr-1">
-            {colunas.map((coluna) => (
-              <AdminKanbanColuna
-                key={coluna.status}
-                coluna={coluna}
-                pedidos={pedidosFiltrados.filter(
-                  (pedido) => pedido.status === coluna.status,
-                )}
-                carregando={carregando}
-                pedidoAtualizando={atualizando}
-                onAlterarStatus={alterarStatus}
-              />
-            ))}
-          </div>
+          <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragEnd={handleDragEnd}
+          >
+            <div className="flex h-full min-h-0 w-max items-stretch gap-3 pr-1">
+              {colunas.map((coluna) => (
+                <AdminKanbanColuna
+                  key={coluna.status}
+                  coluna={coluna}
+                  pedidos={pedidosFiltrados.filter(
+                    (pedido) => pedido.status === coluna.status,
+                  )}
+                  carregando={carregando}
+                  pedidoAtualizando={atualizando}
+                  onAlterarStatus={alterarStatus}
+                />
+              ))}
+            </div>
+          </DndContext>
         </div>
       </div>
     </section>

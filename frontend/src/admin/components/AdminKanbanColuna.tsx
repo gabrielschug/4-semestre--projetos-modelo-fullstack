@@ -4,6 +4,9 @@ import type {
   StatusPedido,
 } from "../utils/AdminPedidoType";
 
+import { useDroppable } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+
 type CorColuna = "amber" | "orange" | "violet" | "blue" | "green" | "gray";
 
 export type ConfiguracaoColunaKanban = {
@@ -45,8 +48,12 @@ export default function AdminKanbanColuna({
   pedidoAtualizando,
   onAlterarStatus,
 }: AdminKanbanColunaProps) {
+  const { setNodeRef } = useDroppable({
+    id: coluna.status,
+  });
   return (
     <section
+      ref={setNodeRef}
       aria-label={`${coluna.titulo}: ${pedidos.length} pedidos`}
       className={`flex h-full min-h-0 w-[min(82vw,18rem)] shrink-0 flex-col rounded-lg border ${estilosColuna[coluna.cor]}`}
     >
@@ -59,7 +66,10 @@ export default function AdminKanbanColuna({
         </span>
       </header>
 
-      <div className="admin-kanban-column-scroll min-h-0 flex-1 space-y-2 overflow-y-scroll px-2 pb-2">
+      <SortableContext 
+        items={pedidos.map((p) => p.id)} 
+        strategy={verticalListSortingStrategy}>
+      <div className="admin-kanban-column-scroll min-h-0 flex-1 space-y-2 overflow-y-auto px-2 pb-2">
         {!carregando && pedidos.length === 0 && (
           <p className="rounded-lg border border-dashed border-gray-300 bg-white/60 px-2 py-4 text-center text-xs text-gray-500">
             Nenhum pedido nesta etapa.
@@ -74,6 +84,7 @@ export default function AdminKanbanColuna({
           />
         ))}
       </div>
+      </SortableContext>
     </section>
   );
 }
