@@ -10,6 +10,10 @@ import { clienteRouter } from "./modules/clientes/routes/ClienteRouter";
 import { adminRouter } from "./modules/admins/routes/AdminRouter";
 import { bairrosRouter } from "./modules/bairros/routes/BairrosRouter";
 import { itensPedidoRouter } from "./modules/itensPedido/routes/ItensPedidoRouter";
+import {
+  pagamentoRouter,
+  pagamentoWebhookRouter,
+} from "./modules/pagamentos/routes/PagamentoRouter";
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
@@ -18,6 +22,8 @@ app.use((req, _res, next) => {
   req.url = req.url.replace(/^\/{2,}/, "/");
   next();
 });
+// Antes do express.json(): o webhook do Stripe precisa do corpo original
+app.use("/pagamentos/webhook", pagamentoWebhookRouter);
 app.use(express.json());
 app.use(cors());
 
@@ -36,6 +42,7 @@ app.use("/admins", adminRouter);
 app.use("/valores_entregas", bairrosRouter);
 app.use("/bairros", bairrosRouter);
 app.use("/itens-pedido", itensPedidoRouter);
+app.use("/pagamentos", pagamentoRouter);
 
 app.get("/", (req, res) => {
   res.send("API: Restaurante");

@@ -4,11 +4,16 @@ import { PedidoRepository } from "../repositories/PedidoRepository";
 import { PedidoService } from "../services/PedidoServices";
 import { PedidoController } from "../controllers/PedidoController";
 import { autenticarAdmin } from "../../../middlewares/autenticarAdmin";
+import { PagamentoRepository } from "../../pagamentos/repositories/PagamentoRepository";
+import { PagamentoService } from "../../pagamentos/services/PagamentoService";
 
 const pedidoRouter = Router();
 
 const repository = new PedidoRepository(prisma);
-const service = new PedidoService(repository);
+const service = new PedidoService(
+  repository,
+  new PagamentoService(new PagamentoRepository(prisma)),
+);
 const controller = new PedidoController(service);
 
 pedidoRouter.get(

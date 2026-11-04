@@ -196,12 +196,16 @@ export class PedidoController {
     }
 
     try {
-      const pedido = await this.PedidoService.criarPedido(dados.data);
+      const { pedido, clientSecret } = await this.PedidoService.criarPedido(
+        dados.data,
+      );
 
       return res.status(201).json({
         mensagem: "Pedido criado com sucesso!",
         pedidoId: pedido.id,
         tempoTotalEstimadoMinutos: pedido.tempoTotalEstimadoMinutos,
+        // Só vem no pagamento online: o frontend usa para abrir o formulário do Stripe
+        clientSecret: clientSecret ?? undefined,
       });
     } catch (error: any) {
       console.error("Erro ao criar pedido:", error);

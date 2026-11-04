@@ -210,8 +210,13 @@ export default function AdminPedidoCard({
       )}
 
       <div className="flex items-center justify-between gap-2 border-t border-gray-100 pt-2">
-        <span className="text-xs font-bold text-gray-900">
+        <span className="flex items-center gap-1.5 text-xs font-bold text-gray-900">
           {formatarMoeda(pedido.valorTotal)}
+          {pedido.pagamento === "ONLINE" && (
+            <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-semibold text-green-800">
+              Pago online
+            </span>
+          )}
         </span>
         <div className="flex items-center gap-1">
           {statusAnteriorPedido && (

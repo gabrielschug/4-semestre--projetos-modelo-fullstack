@@ -1,6 +1,9 @@
 import { PedidoRepository } from "../repositories/PedidoRepository";
 import { CriarPedidoDTO } from "../types/PedidosType";
 import type { ModalEntrega, StatusPedido } from "@prisma/client";
+import { PagamentoService } from "../../pagamentos/services/PagamentoService";
+
+const mesmoValor = (a: number, b: number) => Math.abs(a - b) < 0.005;
 
 function transicaoPermitida(
   statusAtual: StatusPedido,
@@ -36,7 +39,10 @@ function formatarDia(data: Date): string {
 }
 
 export class PedidoService {
-  constructor(private readonly pedidoRepository: PedidoRepository) {}
+  constructor(
+    private readonly pedidoRepository: PedidoRepository,
+    private readonly pagamentoService: PagamentoService,
+  ) {}
 
   async listarPedidos() {
     return await this.pedidoRepository.listarPedidos();
@@ -132,6 +138,14 @@ export class PedidoService {
   }
 
   async criarPedido(dados: CriarPedidoDTO) {
+    const pagamentoOnline = dados.pedido.pagamento === "ONLINE";
+    if (pagamentoOnline) {
+      if (!this.pagamentoService.disponivel) {
+        throw new Error("Pagamento online indisponível no momento.");
+      }
+      await this.conferirValoresPedido(dados);
+    }
+
     const anotacoesItens = dados.pedido.itens
       .filter((item) => item.observacao?.trim())
       .map(
@@ -150,6 +164,67 @@ export class PedidoService {
       dados,
       anotacaoFinal,
     );
-    return novoPedido;
+    if (!pagamentoOnline) {
+      return { pedido: novoPedido, clientSecret: null };
+    }
+
+    try {
+      const clientSecret = await this.pagamentoService.criarIntencaoPagamento(
+        novoPedido.id,
+        novoPedido.valorTotal,
+      );
+      return { pedido: novoPedido, clientSecret };
+    } catch (error) {
+      console.error("Erro ao criar pagamento no Stripe:", error);
+      await this.pedidoRepository.atualizarStatusPedido(
+        novoPedido.id,
+        "PENDENTE",
+        "CANCELADO",
+      );
+      throw new Error(
+        "Não foi possível iniciar o pagamento online. Tente novamente.",
+      );
+    }
+  }
+
+  // No pagamento online o valor cobrado no cartão precisa bater com os
+  // preços do banco, e não só com o que o navegador enviou
+  private async conferirValoresPedido(dados: CriarPedidoDTO) {
+    const { itens, modalEntrega, nomeBairroEntrega, valorTaxaEntrega } =
+      dados.pedido;
+    const precos = await this.pedidoRepository.buscarPrecosAtuais(
+      itens.map((item) => item.produtoID),
+      modalEntrega === "DELIVERY" ? nomeBairroEntrega : undefined,
+    );
+    const valoresDesatualizados = new Error(
+      "Os valores do carrinho mudaram. Revise o pedido e tente novamente.",
+    );
+
+    let totalEsperado = 0;
+    for (const item of itens) {
+      const produto = precos.produtos.find((p) => p.id === item.produtoID);
+      if (!produto || !produto.disponibilidade) {
+        throw new Error(`${item.nomeProduto} não está mais disponível.`);
+      }
+      const precoAtual = produto.precoBase - (produto.valorDesconto ?? 0);
+      if (!mesmoValor(precoAtual, item.precoProduto)) {
+        throw valoresDesatualizados;
+      }
+      totalEsperado += precoAtual * item.quantidade;
+    }
+
+    if (modalEntrega === "DELIVERY") {
+      if (precos.taxaEntrega === null) {
+        throw new Error("Bairro de entrega não cadastrado.");
+      }
+      if (!mesmoValor(precos.taxaEntrega, valorTaxaEntrega ?? 0)) {
+        throw valoresDesatualizados;
+      }
+      totalEsperado += precos.taxaEntrega;
+    }
+
+    if (!mesmoValor(totalEsperado, dados.pedido.valorTotal)) {
+      throw valoresDesatualizados;
+    }
   }
 }

@@ -71,6 +71,10 @@ model Pedido {
   nomeBairroEntrega       String?
   valorTaxaEntrega        Float?
 
+  // Pagamento online (Stripe): o pedido só vai para a cozinha quando pagoEm é preenchido
+  stripePaymentIntentId   String?   @unique
+  pagoEm                  DateTime?
+
   clienteID String
   cliente   Cliente       @relation(fields: [clienteID], references: [id])
   itens     ItensPedido[]
@@ -134,4 +138,5 @@ enum ModalEntrega {
 enum MetodoPagamento {
   DINHEIRO
   MAQUININHA_CARTAO
+  ONLINE
 }

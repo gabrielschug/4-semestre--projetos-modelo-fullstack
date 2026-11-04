@@ -5,6 +5,7 @@ const nomeRestaurante = "Minuta Campeira";
 const nomesPagamento: Record<PedidoAdmin["pagamento"], string> = {
   DINHEIRO: "Dinheiro",
   MAQUININHA_CARTAO: "Cartão (maquininha)",
+  ONLINE: "Pago online",
 };
 
 const formatarMoeda = (valor: number) =>
@@ -29,6 +30,12 @@ function valoresPedido(pedido: PedidoAdmin) {
 
   return { subtotal, taxaEntrega, total: pedido.valorTotal };
 }
+
+// Pedido pago online não tem nada a cobrar na entrega/retirada
+const linhaTotalAPagar = (pedido: PedidoAdmin, total: number) =>
+  pedido.pagamento === "ONLINE"
+    ? `Total: *${formatarMoeda(total)}* (já pago online)`
+    : `Total a pagar: *${formatarMoeda(total)}* (${nomesPagamento[pedido.pagamento] ?? pedido.pagamento})`;
 
 // O cadastro guarda só DDD + número; o wa.me exige o código do país
 export function linkWhatsapp(telefone: string, mensagem: string) {
@@ -91,7 +98,7 @@ export function mensagemSaiuParaEntrega(pedido: PedidoAdmin) {
     "",
     `Subtotal: ${formatarMoeda(subtotal)}`,
     `Taxa de entrega: ${formatarMoeda(taxaEntrega)}`,
-    `Total a pagar: *${formatarMoeda(total)}* (${nomesPagamento[pedido.pagamento] ?? pedido.pagamento})`,
+    linhaTotalAPagar(pedido, total),
     "",
     `Obrigado pela preferência! — ${nomeRestaurante}`,
   ].join("\n");
@@ -104,7 +111,7 @@ export function mensagemProntoParaRetirada(pedido: PedidoAdmin) {
     `Olá, *${pedido.cliente.nome}*! ✅`,
     `Seu pedido *#${numeroPedido(pedido)}* está pronto para retirada.`,
     "",
-    `Total a pagar: *${formatarMoeda(total)}* (${nomesPagamento[pedido.pagamento] ?? pedido.pagamento})`,
+    linhaTotalAPagar(pedido, total),
     "",
     `Obrigado pela preferência! — ${nomeRestaurante}`,
   ].join("\n");

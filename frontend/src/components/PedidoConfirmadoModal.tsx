@@ -1,11 +1,12 @@
 import { Button, Modal, ModalBody, ModalHeader } from "flowbite-react";
-import { CircleCheck, Clock3, MessageCircle } from "lucide-react";
+import { CircleCheck, Clock3, CreditCard, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 type PedidoConfirmadoModalProps = {
   pedidoId: number;
   tempoEstimadoMinutos: number;
   modalEntrega: "DELIVERY" | "RETIRADA";
+  pagoOnline?: boolean;
   clienteLogado: boolean;
   onClose: () => void;
 };
@@ -14,6 +15,7 @@ export function PedidoConfirmadoModal({
   pedidoId,
   tempoEstimadoMinutos,
   modalEntrega,
+  pagoOnline = false,
   clienteLogado,
   onClose,
 }: PedidoConfirmadoModalProps) {
@@ -60,6 +62,13 @@ export function PedidoConfirmadoModal({
               </strong>
             </span>
           </div>
+
+          {pagoOnline && (
+            <div className="mb-4 flex items-center justify-center gap-2 text-base text-secundaria/80">
+              <CreditCard className="h-5 w-5 shrink-0 text-primaria" />
+              <span>Pagamento online aprovado</span>
+            </div>
+          )}
 
           {/* Aviso WhatsApp */}
           <div className="mb-8 flex items-center justify-center gap-3 text-base text-secundaria/70">

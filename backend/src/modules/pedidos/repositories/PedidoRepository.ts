@@ -1,5 +1,11 @@
-import { PrismaClient, type StatusPedido } from "@prisma/client";
+import { PrismaClient, type Prisma, type StatusPedido } from "@prisma/client";
 import { CriarPedidoDTO } from "../types/PedidosType";
+
+// Pedido pago online só aparece (Kanban, dashboard, "Meus pedidos")
+// depois que o Stripe confirma o pagamento
+const pedidoVisivel = {
+  NOT: { pagamento: "ONLINE", pagoEm: null },
+} satisfies Prisma.PedidoWhereInput;
 
 export class PedidoRepository {
   private prisma: PrismaClient;
@@ -10,6 +16,7 @@ export class PedidoRepository {
 
   async listarPedidos() {
     return await this.prisma.pedido.findMany({
+      where: pedidoVisivel,
       orderBy: { dataHora: "desc" },
       select: {
         id: true,
@@ -64,6 +71,7 @@ export class PedidoRepository {
   async contarPedidosPorStatus() {
     const contagens = await this.prisma.pedido.groupBy({
       by: ["status"],
+      where: pedidoVisivel,
       _count: { _all: true },
     });
 
@@ -76,7 +84,7 @@ export class PedidoRepository {
   async somarItensVendidos() {
     const itens = await this.prisma.itensPedido.groupBy({
       by: ["produtoID"],
-      where: { pedido: { status: { not: "CANCELADO" } } },
+      where: { pedido: { status: { not: "CANCELADO" }, ...pedidoVisivel } },
       _sum: { quantidade: true },
     });
     const produtos = await this.prisma.produto.findMany({
@@ -94,14 +102,18 @@ export class PedidoRepository {
 
   async listarDatasPedidosDesde(inicio: Date) {
     return await this.prisma.pedido.findMany({
-      where: { dataHora: { gte: inicio }, status: { not: "CANCELADO" } },
+      where: {
+        dataHora: { gte: inicio },
+        status: { not: "CANCELADO" },
+        ...pedidoVisivel,
+      },
       select: { dataHora: true },
     });
   }
 
   async listarPedidosDoCliente(clienteID: string) {
     return await this.prisma.pedido.findMany({
-      where: { clienteID },
+      where: { clienteID, ...pedidoVisivel },
       orderBy: { dataHora: "desc" },
       select: {
         id: true,
@@ -194,6 +206,28 @@ export class PedidoRepository {
       where: { telefone },
       orderBy: { id: "desc" },
     });
+  }
+
+  async buscarPrecosAtuais(produtoIds: number[], nomeBairroEntrega?: string) {
+    const [produtos, bairro] = await Promise.all([
+      this.prisma.produto.findMany({
+        where: { id: { in: produtoIds } },
+        select: {
+          id: true,
+          precoBase: true,
+          valorDesconto: true,
+          disponibilidade: true,
+        },
+      }),
+      nomeBairroEntrega
+        ? this.prisma.valorEntrega.findUnique({
+            where: { bairro: nomeBairroEntrega },
+            select: { valor: true },
+          })
+        : null,
+    ]);
+
+    return { produtos, taxaEntrega: bairro?.valor ?? null };
   }
 
   private async calcularTempoEstimado(
