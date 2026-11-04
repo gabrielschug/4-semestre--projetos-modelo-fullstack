@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useCarrinho } from "../context/useCarrinhoStore";
+import { useCarrinho, type ItemCarrinho } from "../context/useCarrinhoStore";
 import { useClienteStore } from "../context/ClienteContext";
 import type { BairroType } from "../utils/BairroType";
 import {
@@ -17,27 +17,49 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { checkoutSchema, type CheckoutData } from "../schemas/CheckoutSchema";
 import { PedidoConfirmadoModal } from "./PedidoConfirmadoModal";
+import { PagamentoOnline } from "./PagamentoOnline";
 import { calcularPrecoFinal } from "../utils/ProdutoType";
+import {
+  confirmarPagamentoNoServidor,
+  stripePromise,
+} from "../utils/stripe";
 
 const apiUrl = import.meta.env.VITE_API_URL;
+
+type PedidoConfirmado = {
+  pedidoId: number;
+  tempoEstimadoMinutos: number;
+  modalEntrega: "DELIVERY" | "RETIRADA";
+  pagoOnline: boolean;
+};
+
+// Pedido online já criado, esperando o cliente pagar no formulário do Stripe
+type PagamentoPendente = Omit<PedidoConfirmado, "pagoOnline"> & {
+  clientSecret: string;
+  total: number;
+  nomeCliente: string;
+  itens: ItemCarrinho[];
+};
 
 export function CarrinhoDrawer() {
   const { itens, drawerAberto, fecharDrawer, limparCarrinho } = useCarrinho();
   const cliente = useClienteStore((state) => state.cliente);
   const [listaBairros, setListaBairros] = useState<BairroType[]>([]);
   const enderecoPrincipal = cliente.enderecos?.[0];
-  const [pedidoConfirmado, setPedidoConfirmado] = useState<{
-    pedidoId: number;
-    tempoEstimadoMinutos: number;
-    modalEntrega: "DELIVERY" | "RETIRADA";
-  } | null>(null);
+  const [pedidoConfirmado, setPedidoConfirmado] =
+    useState<PedidoConfirmado | null>(null);
+  const [pagamentoPendente, setPagamentoPendente] =
+    useState<PagamentoPendente | null>(null);
+  // Se o carrinho mudar, o valor cobrado ficaria errado: volta para o formulário
+  const pagamentoAtual =
+    pagamentoPendente?.itens === itens ? pagamentoPendente : null;
 
   const {
     register,
     handleSubmit,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<CheckoutData>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: { modalEntrega: "DELIVERY", pagamento: "DINHEIRO" },
@@ -53,6 +75,41 @@ export function CarrinhoDrawer() {
 
   const modalEntregaAtual = watch("modalEntrega");
   const bairroSelecionadoAtual = watch("bairroID");
+  const pagamentoSelecionado = watch("pagamento");
+
+  // Quando o Stripe redireciona de volta (ex.: Pix aprovado), a URL traz
+  // ?pedido=ID&redirect_status=... e a confirmação termina aqui
+  useEffect(() => {
+    const parametros = new URLSearchParams(window.location.search);
+    const pedidoId = Number(parametros.get("pedido"));
+    const status = parametros.get("redirect_status");
+    if (!pedidoId || !status) {
+      return;
+    }
+    // Limpa a URL na hora para não processar o retorno duas vezes
+    window.history.replaceState(null, "", window.location.pathname);
+
+    if (status === "processing") {
+      toast.info(
+        "Pagamento em processamento. O pedido vai para a cozinha assim que for aprovado.",
+      );
+      return;
+    }
+    if (status !== "succeeded") {
+      toast.error("O pagamento não foi concluído. Tente novamente.");
+      return;
+    }
+    confirmarPagamentoNoServidor(pedidoId).then((pedido) => {
+      if (pedido) {
+        setPedidoConfirmado({ ...pedido, pagoOnline: true });
+      } else {
+        toast.warning(
+          `Pagamento recebido, mas não conseguimos avisar o restaurante. Se o pedido #${pedidoId} não aparecer em alguns minutos, fale conosco pelo WhatsApp.`,
+          { duration: 15000 },
+        );
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (drawerAberto) {
@@ -133,6 +190,29 @@ export function CarrinhoDrawer() {
       const responseData = await response.json();
 
       if (response.status === 201) {
+        if (data.pagamento === "ONLINE") {
+          // O carrinho só é limpo depois que o pagamento for aprovado
+          if (
+            typeof responseData.pedidoId === "number" &&
+            typeof responseData.tempoTotalEstimadoMinutos === "number" &&
+            typeof responseData.clientSecret === "string"
+          ) {
+            setPagamentoPendente({
+              pedidoId: responseData.pedidoId,
+              tempoEstimadoMinutos: responseData.tempoTotalEstimadoMinutos,
+              modalEntrega: data.modalEntrega,
+              clientSecret: responseData.clientSecret,
+              total,
+              nomeCliente: data.nome,
+              itens,
+            });
+          } else {
+            console.error("Resposta de pagamento online inválida:", responseData);
+            toast.error("Não foi possível iniciar o pagamento online.");
+          }
+          return;
+        }
+
         limparCarrinho();
         fecharDrawer();
         if (
@@ -143,6 +223,7 @@ export function CarrinhoDrawer() {
             pedidoId: responseData.pedidoId,
             tempoEstimadoMinutos: responseData.tempoTotalEstimadoMinutos,
             modalEntrega: data.modalEntrega,
+            pagoOnline: false,
           });
         } else {
           console.error(
@@ -205,7 +286,31 @@ export function CarrinhoDrawer() {
           titleIcon={() => <></>}
           className="bg-fundo p-4 text-secundaria"
         />
-        <DrawerItems className="flex-1 overflow-y-auto bg-fundo p-4">
+        {pagamentoAtual && (
+          <PagamentoOnline
+            key={pagamentoAtual.clientSecret}
+            pedidoId={pagamentoAtual.pedidoId}
+            clientSecret={pagamentoAtual.clientSecret}
+            total={pagamentoAtual.total}
+            nomeCliente={pagamentoAtual.nomeCliente}
+            onVoltar={() => setPagamentoPendente(null)}
+            onPago={() => {
+              setPagamentoPendente(null);
+              limparCarrinho();
+              fecharDrawer();
+              setPedidoConfirmado({
+                pedidoId: pagamentoAtual.pedidoId,
+                tempoEstimadoMinutos: pagamentoAtual.tempoEstimadoMinutos,
+                modalEntrega: pagamentoAtual.modalEntrega,
+                pagoOnline: true,
+              });
+            }}
+          />
+        )}
+        {/* Durante o pagamento o formulário só fica escondido, para manter o que foi preenchido */}
+        <DrawerItems
+          className={`flex-1 overflow-y-auto bg-fundo p-4 ${pagamentoAtual ? "hidden" : ""}`}
+        >
           <div className="flex justify-end mb-2">
             <Button
               size="xs"
@@ -389,6 +494,19 @@ export function CarrinhoDrawer() {
                   />
                   <Label htmlFor="dinheiro">Dinheiro</Label>
                 </div>
+                {stripePromise && (
+                  <div className="flex items-center gap-2">
+                    <Radio
+                      id="online"
+                      value="ONLINE"
+                      className="text-primaria focus:ring-primaria"
+                      {...register("pagamento")}
+                    />
+                    <Label htmlFor="online">
+                      Pagar online agora (Pix ou cartão de crédito/débito)
+                    </Label>
+                  </div>
+                )}
               </fieldset>
             </div>
             <div>
@@ -412,7 +530,9 @@ export function CarrinhoDrawer() {
         </DrawerItems>
 
         {/* Footer Fixo */}
-        <div className="flex gap-3 border-t border-secundaria/10 bg-fundo p-4">
+        <div
+          className={`${pagamentoAtual ? "hidden" : "flex"} gap-3 border-t border-secundaria/10 bg-fundo p-4`}
+        >
           <Button
             onClick={fecharDrawer}
             className="flex-1 cursor-pointer border border-secundaria/20 bg-fundo text-secundaria hover:bg-secundaria/5 focus:ring-primaria"
@@ -422,9 +542,14 @@ export function CarrinhoDrawer() {
           <Button
             type="submit"
             form="form-checkout"
+            disabled={isSubmitting}
             className="flex-1 cursor-pointer bg-primaria font-bold text-white hover:bg-secundaria focus:ring-primaria"
           >
-            Confirmar Pedido
+            {isSubmitting
+              ? "Enviando..."
+              : pagamentoSelecionado === "ONLINE"
+                ? "Ir para pagamento"
+                : "Confirmar Pedido"}
           </Button>
         </div>
       </Drawer>
@@ -433,6 +558,7 @@ export function CarrinhoDrawer() {
           pedidoId={pedidoConfirmado.pedidoId}
           tempoEstimadoMinutos={pedidoConfirmado.tempoEstimadoMinutos}
           modalEntrega={pedidoConfirmado.modalEntrega}
+          pagoOnline={pedidoConfirmado.pagoOnline}
           clienteLogado={Boolean(cliente.id)}
           onClose={() => setPedidoConfirmado(null)}
         />

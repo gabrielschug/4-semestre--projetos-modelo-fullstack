@@ -11,7 +11,7 @@ export const criarPedidoSchema = z.object({
     modalEntrega: z.enum(["DELIVERY", "RETIRADA"], {
       error: "Modalidade de entrega é obrigatória",
     }),
-    pagamento: z.enum(["DINHEIRO", "MAQUININHA_CARTAO"], {
+    pagamento: z.enum(["DINHEIRO", "MAQUININHA_CARTAO", "ONLINE"], {
       error: "Forma de pagamento é obrigatória",
     }),
     valorTotal: z.number().positive("O valor total deve ser positivo"),

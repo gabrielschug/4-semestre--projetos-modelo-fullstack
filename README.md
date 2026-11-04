@@ -32,10 +32,12 @@ A aplicação foi pensada como um sistema de e-commerce gastronômico, com duas 
 - TypeScript
 - Prisma ORM
 - PostgreSQL
+- Multer para receber imagens de produtos
+- Cloudinary para armazenar imagens de produtos
 - JWT para autenticação
 - Bcrypt para hash de senhas
 - Zod para validação de entrada
-- Swagger / OpenAPI para documentação interativa da API
+
 
 ## Objetivos acadêmicos
 
@@ -63,6 +65,7 @@ Este projeto foi desenvolvido com foco em aprender e aplicar os conceitos vistos
 - cálculo de valor do pedido
 - seleção de tipo de entrega (delivery ou retirada)
 - escolha de bairro e valor de entrega
+- pagamento em dinheiro, na maquininha ou online com Pix e cartão de crédito/débito (Stripe)
 - acompanhamento dos pedidos realizados
 - avaliação de itens do pedido
 
@@ -70,20 +73,13 @@ Este projeto foi desenvolvido com foco em aprender e aplicar os conceitos vistos
 - login administrativo
 - painel com resumo dos pedidos por status
 - quadro Kanban para controlar a produção e entrega
+- movimentação de pedidos entre as etapas do Kanban por drag and drop, com atualização do status no backend
 - atualização de status do pedido
-- cadastro e gerenciamento de produtos
+- cadastro e gerenciamento de produtos com envio de imagens
 - gestão de bairros e valores de entrega
 - controle de tempo estimado de entrega e preparo
 
-## Documentação da API
 
-A API conta com documentação interativa criada com Swagger UI, que apresenta as rotas disponíveis e permite consultar e testar as operações. As rotas administrativas protegidas também podem ser testadas informando um token de acesso.
-
-Com o backend em execução, acesse a documentação em:
-
-```text
-http://localhost:3000/docs
-```
 
 ## Estrutura do projeto
 
@@ -191,7 +187,7 @@ No Windows PowerShell:
 Copy-Item .env.example .env
 ```
 
-O arquivo `.env.example` lista as variáveis necessárias, incluindo `DATABASE_URL`, `JWT_SECRET` e `PORT`. Configure a conexão e uma chave secreta forte antes de iniciar o servidor. `GEMINI_API_KEY` é opcional e só é necessária para gerar frases de venda com Gemini.
+O arquivo `.env.example` lista as variáveis necessárias, incluindo `DATABASE_URL`, `JWT_SECRET` e `PORT`. Configure a conexão e uma chave secreta forte antes de iniciar o servidor. Para enviar imagens de produtos, configure também as credenciais da sua conta Cloudinary. `GEMINI_API_KEY` é opcional e só é necessária para gerar frases de venda com Gemini.
 
 As variáveis principais são:
 
@@ -199,6 +195,9 @@ As variáveis principais são:
 DATABASE_URL="postgresql://USUARIO:SENHA@localhost:5432/NOME_DO_BANCO?schema=public"
 JWT_SECRET="sua_chave_secreta_super_segura"
 PORT=3000
+CLOUDINARY_CLOUD_NAME="seu_cloud_name"
+CLOUDINARY_API_KEY="sua_api_key"
+CLOUDINARY_API_SECRET="sua_api_secret"
 ```
 
 Exemplo:
@@ -233,11 +232,6 @@ O backend ficará disponível em:
 http://localhost:3000
 ```
 
-A documentação interativa da API, disponibilizada pelo Swagger UI, pode ser acessada enquanto o backend estiver em execução:
-
-```text
-http://localhost:3000/docs
-```
 
 ### 3. Configurar o frontend
 

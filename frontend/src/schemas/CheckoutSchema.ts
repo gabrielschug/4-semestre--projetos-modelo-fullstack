@@ -13,7 +13,7 @@ export const checkoutSchema = z
       message:"O telefone deve conter o DDD de 2 dígitos seguido de um celular com 9 dígitos"
     }),
     modalEntrega: z.enum(["DELIVERY", "RETIRADA"]),
-    pagamento: z.enum(["DINHEIRO", "MAQUININHA_CARTAO"]),
+    pagamento: z.enum(["DINHEIRO", "MAQUININHA_CARTAO", "ONLINE"]),
     bairroID: z.number().int().positive().optional(),
     rua: z.string().trim().optional(),
     numero: z.string().trim().optional(),

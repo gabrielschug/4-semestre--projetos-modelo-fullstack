@@ -421,7 +421,9 @@ export const swaggerDocumento = {
                   modalEntrega: { type: "string", enum: ["DELIVERY", "RETIRADA"] },
                   pagamento: {
                     type: "string",
-                    enum: ["DINHEIRO", "MAQUININHA_CARTAO"],
+                    enum: ["DINHEIRO", "MAQUININHA_CARTAO", "ONLINE"],
+                    description:
+                      "ONLINE: a resposta traz `clientSecret` para pagar com Stripe (Pix ou cartão de crédito/débito). O pedido só aparece no Kanban depois do pagamento confirmado.",
                   },
                   valorTotal: { type: "number" },
                   anotacaoGeral: { type: "string" },
@@ -616,6 +618,38 @@ export const swaggerDocumento = {
         tags: ["Itens de pedido"],
         summary: "Média de avaliação por produto",
         responses: { 200: resposta("OK") },
+      },
+    },
+    "/pagamentos/pedidos/{pedidoId}/confirmar": {
+      post: {
+        tags: ["Pagamentos"],
+        summary: "Confirmar pagamento online (consulta o Stripe)",
+        parameters: [caminho("pedidoId")],
+        responses: {
+          200: resposta("Pagamento confirmado", {
+            type: "object",
+            properties: {
+              mensagem: { type: "string" },
+              pedidoId: { type: "integer" },
+              tempoTotalEstimadoMinutos: { type: "integer" },
+              modalEntrega: { type: "string", enum: ["DELIVERY", "RETIRADA"] },
+            },
+          }),
+          400: r400,
+          404: r404,
+          409: resposta("Pagamento ainda não aprovado"),
+          503: resposta("Stripe não configurado"),
+        },
+      },
+    },
+    "/pagamentos/webhook": {
+      post: {
+        tags: ["Pagamentos"],
+        summary: "Webhook do Stripe (chamado pelo próprio Stripe)",
+        responses: {
+          200: resposta("Evento recebido"),
+          400: resposta("Assinatura inválida ou webhook não configurado"),
+        },
       },
     },
   },
